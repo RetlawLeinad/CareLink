@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CareLink</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nunito+Sans:wght@400;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --cl-navy:      #1A2D6B;
+  --cl-navy-md:   #2756B0;
+  --cl-navy-lt:   #E8EEF8;
+  --cl-blue:      #3A7BD5;
+  --cl-blue-lt:   #EBF3FD;
+  --cl-violet:    #8040CC;
+  --cl-violet-lt: #F2ECFA;
+  --cl-cyan:      #3DB8D8;
+  --teal:      #0DC5A0;
+  --teal-dk:   #09A080;
+  --teal-lt:   #E0FAF4;
+  --orange:    #F07830;
+  --orange-lt: #FFF0E5;
+  --green:     #27AE60;
+  --green-lt:  #E9F7EF;
+  --red:       #E1191F;
+  --red-lt:    #FDEAEA;
+  --bg:     #F2F5FB;
+  --card:   #FFFFFF;
+  --muted:  #6E82A6;
+  --border: #DDE5F0;
+  --shadow:    0 6px 28px rgba(26,45,107,.13);
+  --shadow-sm: 0 2px 12px rgba(26,45,107,.08);
+  --r:    22px;
+  --r-sm: 15px;
+}
+body {
+  font-family: 'Outfit', sans-serif;
+  background: linear-gradient(145deg, #0E1A3E 0%, #1A2D6B 45%, #2756B0 100%);
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+}
+.phone {
+  width: 390px; height: 844px;
+  background: #090f22; border-radius: 54px;
+  box-shadow: 0 0 0 2px #1a2d6b, 0 0 0 6px #090f22,
+              0 48px 110px rgba(0,0,0,.8),
+              inset 0 0 0 1px rgba(255,255,255,.07);
+  position: relative; overflow: hidden; flex-shrink: 0;
+}
+.phone::before {
+  content:''; position:absolute; left:-5px; top:160px;
+  width:4px; height:36px; background:#1a2d6b; border-radius:2px 0 0 2px;
+  box-shadow: 0 50px 0 #1a2d6b, 0 96px 0 #1a2d6b;
+}
+.phone::after {
+  content:''; position:absolute; right:-5px; top:200px;
+  width:4px; height:68px; background:#1a2d6b; border-radius:0 2px 2px 0;
+}
+.screen {
+  width:100%; height:100%; border-radius:52px;
+  overflow:hidden; position:relative; background:var(--bg);
+}
+.island {
+  position:absolute; top:12px; left:50%; transform:translateX(-50%);
+  width:120px; height:34px; background:#000; border-radius:20px;
+  z-index:200; pointer-events:none;
+}
+.app-screen {
+  position:absolute; top:0; left:0; right:0; bottom:0;
+  background:var(--bg); border-radius:52px;
+  overflow:hidden; display:none; flex-direction:column;
+  opacity:0; transform:translateX(34px);
+  transition: opacity .3s cubic-bezier(.4,0,.2,1), transform .3s cubic-bezier(.4,0,.2,1);
+}
+.app-screen.active { display:flex; opacity:1; transform:translateX(0); }
+.app-screen.slide-out { opacity:0; transform:translateX(-34px); }
+.app-screen.slide-in  { opacity:0; transform:translateX(34px); }
+.status-bar {
+  height:50px; background:transparent;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 28px 0; z-index:10; flex-shrink:0;
+}
+.status-time { font-family:'Nunito',sans-serif; font-weight:800; font-size:15px; }
+.status-icons { display:flex; gap:5px; align-items:center; font-size:13px; }
+.btn-back {
+  width:38px; height:38px; border-radius:12px; background:var(--bg);
+  border:none; cursor:pointer; font-size:20px; color:var(--cl-navy);
+  display:flex; align-items:center; justify-content:center; transition:background .2s;
+}
+.btn-back:hover { background:var(--border); }
+.scrollable { overflow-y:auto; flex:1; padding:16px; }
+.scrollable::-webkit-scrollbar { display:none; }
+.section-title { font-family:'Nunito',sans-serif; font-weight:800; font-size:14px; color:var(--cl-navy); margin-bottom:9px; margin-top:4px; }
+.nav-bar {
+  background:var(--card); border-top:1px solid var(--border);
+  padding:6px 4px 16px; display:flex; justify-content:space-around; flex-shrink:0;
+}
+.nav-item {
+  display:flex; flex-direction:column; align-items:center; gap:2px;
+  background:none; border:none; cursor:pointer;
+  padding:6px 8px; border-radius:14px; transition:background .2s; min-width:72px; position:relative;
+}
+.nav-item:hover { background:var(--bg); }
+.nav-item.active { background:var(--cl-navy-lt); }
+.nav-icon  { font-size:20px; line-height:1; }
+.nav-label { font-size:10px; font-weight:600; color:var(--muted); white-space:nowrap; }
+.nav-item.active .nav-label { color:var(--cl-navy); font-weight:800; }
+.nav-active-dot {
+  position:absolute; bottom:4px; left:50%; transform:translateX(-50%);
+  width:4px; height:4px; border-radius:50%; background:var(--cl-violet); display:none;
+}
+.nav-item.active .nav-active-dot { display:block; }
+.toast {
+  position:absolute; top:58px; left:14px; right:14px;
+  background:var(--cl-navy); color:#fff;
+  padding:12px 15px; border-radius:16px; font-size:13px; font-weight:600;
+  display:flex; align-items:center; gap:9px; z-index:300;
+  box-shadow:0 8px 30px rgba(26,45,107,.35);
+  transform:translateY(-90px); opacity:0;
+  transition:transform .4s cubic-bezier(.4,0,.2,1), opacity .4s;
+}
+.toast.show { transform:translateY(0); opacity:1; }
+
+/* ── CARELINK LOGO SVG ── */
+.cl-logo-row { display:flex; align-items:center; gap:11px; }
+.cl-logo-svg { width:48px; height:48px; flex-shrink:0; filter:drop-shadow(0 3px 12px rgba(55,105,200,.45)); }
+.cl-wordmark-wrap { display:flex; flex-direction:column; justify-content:center; }
+.cl-wordmark-text {
+  font-family:'Nunito Sans',sans-serif; font-weight:900; font-size:30px; line-height:1; letter-spacing:.5px;
+  display:flex; align-items:center;
+}
+.cl-care { color:#fff; }
+.cl-link { color:#7EC8F0; }
+.cl-tagline {
+  display:flex; align-items:center; gap:5px;
+  font-size:8px; color:rgba(255,255,255,.55); font-weight:700; letter-spacing:1.6px; text-transform:uppercase; margin-top:3px;
+}
+.cl-tagline-line { flex:1; height:1px; background:rgba(255,255,255,.3); min-width:10px; }
+
+/* ── HOME HEADER ── */
+.home-header {
+  background:linear-gradient(160deg, var(--cl-navy) 0%, var(--cl-navy-md) 100%);
+  padding:52px 20px 22px; border-radius:0 0 32px 32px;
+  position:relative; overflow:hidden; flex-shrink:0;
+}
+.home-header::before {
+  content:''; position:absolute; top:-60px; right:-60px;
+  width:200px; height:200px;
+  background:radial-gradient(circle, rgba(128,64,204,.25), transparent 70%);
+  border-radius:50%;
+}
+.home-header::after {
+  content:''; position:absolute; bottom:-40px; left:-20px;
+  width:160px; height:160px;
+  background:radial-gradient(circle, rgba(61,184,216,.18), transparent 70%);
+  border-radius:50%;
+}
+.logo-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.notif-btn {
+  width:40px; height:40px; background:rgba(255,255,255,.12); border:none; border-radius:13px;
+  cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center; position:relative;
+}
+.notif-dot {
+  position:absolute; top:8px; right:8px; width:8px; height:8px;
+  background:var(--cl-violet); border-radius:50%; border:2px solid var(--cl-navy);
+  animation:pulse-dot 2s infinite;
+}
+@keyframes pulse-dot { 0%,100%{transform:scale(1)} 50%{transform:scale(1.35)} }
+.greeting  { color:rgba(255,255,255,.6); font-size:13px; margin-bottom:2px; }
+.user-name { font-family:'Nunito',sans-serif; font-weight:900; font-size:22px; color:#fff; margin-bottom:12px; }
+.adherence-card {
+  background:rgba(255,255,255,.1); backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.14); border-radius:16px; padding:12px 15px;
+  display:flex; align-items:center; gap:13px;
+}
+.adherence-ring { width:50px; height:50px; flex-shrink:0; position:relative; }
+.adherence-ring svg { transform:rotate(-90deg); }
+.ring-bg { fill:none; stroke:rgba(255,255,255,.2); stroke-width:5; }
+.ring-fg { fill:none; stroke:var(--cl-violet); stroke-width:5; stroke-linecap:round; stroke-dasharray:132; stroke-dashoffset:26; }
+.ring-label { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Nunito',sans-serif; font-weight:900; font-size:12px; color:#fff; }
+.adherence-title { font-weight:700; font-size:13px; color:#fff; margin-bottom:2px; }
+.adherence-sub   { font-size:11px; color:rgba(255,255,255,.62); }
+.next-dose {
+  margin:12px 14px 0;
+  background:linear-gradient(135deg, var(--cl-violet), #5E28A8);
+  border-radius:var(--r); padding:12px 16px;
+  display:flex; align-items:center; gap:12px; cursor:pointer;
+  box-shadow:0 6px 20px rgba(128,64,204,.4); transition:transform .2s;
+}
+.next-dose:hover { transform:translateY(-2px); }
+.next-dose-label { font-size:11px; color:rgba(255,255,255,.78); font-weight:500; margin-bottom:2px; }
+.next-dose-value { font-family:'Nunito',sans-serif; font-weight:900; font-size:14px; color:#fff; }
+.next-dose-arrow { margin-left:auto; color:rgba(255,255,255,.8); font-size:18px; }
+.module-grid {
+  display:grid; grid-template-columns:repeat(2,1fr);
+  gap:10px; padding:12px 14px 8px;
+}
+.module-btn {
+  border-radius:var(--r); padding:22px 14px 18px;
+  display:flex; flex-direction:column; align-items:flex-start; gap:0;
+  border:none; cursor:pointer;
+  box-shadow:var(--shadow-sm); transition:transform .2s, box-shadow .2s;
+  position:relative; overflow:hidden; min-height:110px;
+}
+.module-btn::after {
+  content:''; position:absolute; bottom:-18px; right:-14px;
+  width:72px; height:72px; border-radius:50%;
+  background:rgba(255,255,255,.12);
+}
+.module-btn:hover  { transform:translateY(-3px); box-shadow:var(--shadow); }
+.module-btn:active { transform:scale(.97); }
+.module-icon-wrap {
+  width:52px; height:52px; border-radius:16px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:26px; background:rgba(255,255,255,.28); margin-bottom:12px;
+}
+.module-label { font-family:'Nunito',sans-serif; font-weight:900; font-size:14px; line-height:1.2; text-align:left; }
+.module-sub   { font-size:10px; font-weight:600; opacity:.75; margin-top:2px; }
+.mod-reminder  { background:linear-gradient(135deg, #0DC5A0, #09A080); }
+.mod-reminder  .module-label, .mod-reminder  .module-sub { color:#fff; }
+.mod-farmacia  { background:linear-gradient(135deg, var(--cl-blue), var(--cl-navy-md)); }
+.mod-farmacia  .module-label, .mod-farmacia  .module-sub { color:#fff; }
+.mod-pedidos   { background:linear-gradient(135deg, var(--orange), #D0601A); }
+.mod-pedidos   .module-label, .mod-pedidos   .module-sub { color:#fff; }
+.mod-citas     { background:linear-gradient(135deg, var(--cl-violet), #5E28A8); }
+.mod-citas     .module-label, .mod-citas     .module-sub { color:#fff; }
+.mod-contactos { background:linear-gradient(135deg, #F4C430, #D4A010); }
+.mod-contactos .module-label, .mod-contactos .module-sub { color:#fff; }
+.mod-emergencia { background:linear-gradient(135deg, #E1191F, #A00F14); }
+.mod-emergencia .module-label, .mod-emergencia .module-sub { color:#fff; }
+
+/* ── REMINDER ── */
+.progress-bar-wrap { background:var(--border); border-radius:99px; height:7px; margin-bottom:5px; }
+.progress-bar-fill { height:100%; border-radius:99px; background:linear-gradient(90deg,var(--cl-violet),var(--cl-blue)); }
+.dose-card {
+  background:var(--card); border-radius:var(--r-sm); padding:12px;
+  margin-bottom:9px; display:flex; align-items:center; gap:11px;
+  box-shadow:var(--shadow-sm); cursor:pointer; transition:transform .2s;
+}
+.dose-card:hover { transform:translateX(3px); }
+.dose-time-block { background:var(--cl-navy-lt); border-radius:10px; padding:8px 11px; text-align:center; flex-shrink:0; min-width:60px; }
+.dose-time   { font-family:'Nunito',sans-serif; font-weight:900; font-size:14px; color:var(--cl-navy); }
+.dose-period { font-size:10px; color:var(--cl-navy-md); font-weight:600; }
+.dose-name   { font-weight:700; font-size:13px; color:var(--cl-navy); }
+.dose-detail { font-size:11px; color:var(--muted); margin-top:2px; }
+.dose-status { margin-left:auto; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
+.status-taken   { background:var(--teal-lt); }
+.status-pending { background:var(--orange-lt); }
+.status-missed  { background:var(--red-lt); }
+
+/* ── FARMACIA ── */
+.med-card { background:var(--card); border-radius:var(--r-sm); padding:13px; margin-bottom:9px; display:flex; gap:11px; box-shadow:var(--shadow-sm); align-items:center; }
+.med-icon-wrap { width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
+.med-name  { font-family:'Nunito',sans-serif; font-weight:800; font-size:13px; color:var(--cl-navy); }
+.med-dose  { font-size:11px; color:var(--muted); margin-top:1px; }
+.med-stock { font-size:11px; font-weight:600; margin-top:4px; }
+.stock-ok  { color:var(--teal-dk); }
+.stock-low { color:var(--orange); }
+.med-schedule { background:var(--cl-blue-lt); border-radius:9px; padding:5px 9px; font-size:10px; font-weight:700; color:var(--cl-blue); white-space:nowrap; flex-shrink:0; align-self:flex-start; }
+
+/* ── PEDIDOS ── */
+.order-card { background:var(--card); border-radius:var(--r); padding:16px; box-shadow:var(--shadow-sm); margin-bottom:11px; }
+.order-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:13px; }
+.order-id { font-weight:600; font-size:12px; color:var(--muted); }
+.order-badge { padding:4px 10px; border-radius:99px; font-size:11px; font-weight:700; }
+.badge-transit   { background:var(--orange-lt); color:var(--orange); }
+.badge-delivered { background:var(--teal-lt); color:var(--teal-dk); }
+.order-steps { display:flex; align-items:center; margin-bottom:5px; }
+.step-dot  { width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; }
+.step-done   { background:var(--teal); color:#fff; }
+.step-active { background:var(--orange); color:#fff; animation:pulse-step 1.5s infinite; }
+.step-next   { background:var(--border); color:var(--muted); }
+.step-line { flex:1; height:3px; border-radius:99px; }
+.step-line-done { background:var(--teal); }
+.step-line-next { background:var(--border); }
+.step-label { font-size:9px; color:var(--muted); text-align:center; margin-top:3px; }
+.steps-labels { display:flex; justify-content:space-between; }
+@keyframes pulse-step { 0%,100%{box-shadow:0 0 0 0 rgba(240,120,48,.5)} 50%{box-shadow:0 0 0 7px rgba(240,120,48,0)} }
+
+/* ── CITAS ── */
+.cita-card { background:var(--card); border-radius:var(--r-sm); padding:13px; margin-bottom:9px; display:flex; gap:11px; box-shadow:var(--shadow-sm); cursor:pointer; transition:transform .2s; align-items:center; }
+.cita-card:hover { transform:translateX(3px); }
+.cita-date-block { background:var(--cl-violet-lt); border-radius:12px; padding:8px 11px; text-align:center; flex-shrink:0; min-width:50px; }
+.cita-day   { font-family:'Nunito',sans-serif; font-weight:900; font-size:19px; color:var(--cl-violet); line-height:1; }
+.cita-month { font-size:10px; color:var(--cl-violet); font-weight:700; text-transform:uppercase; }
+.cita-doctor { font-weight:700; font-size:13px; color:var(--cl-navy); }
+.cita-spec   { font-size:11px; color:var(--muted); margin-top:1px; }
+.cita-time   { font-size:11px; font-weight:600; color:var(--cl-violet); margin-top:4px; }
+
+/* ── CONTACTOS ── */
+.contact-card { background:var(--card); border-radius:var(--r-sm); padding:12px 13px; margin-bottom:8px; display:flex; align-items:center; gap:11px; box-shadow:var(--shadow-sm); }
+.contact-avatar { width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+.contact-name { font-weight:700; font-size:13px; color:var(--cl-navy); }
+.contact-rel  { font-size:11px; color:var(--muted); margin-top:1px; }
+.contact-actions { display:flex; gap:6px; margin-left:auto; }
+.btn-call,.btn-msg { width:32px; height:32px; border-radius:10px; border:none; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; transition:transform .2s; }
+.btn-call:hover,.btn-msg:hover { transform:scale(1.1); }
+.btn-call { background:var(--teal-lt); }
+.btn-msg  { background:var(--cl-blue-lt); }
+
+/* ── EMERGENCIA ── */
+#screen-emergencia { background:linear-gradient(160deg,#6A0010,#A80F18,#E1191F); }
+.emergency-top { padding:54px 20px 16px; display:flex; align-items:center; gap:12px; flex-shrink:0; }
+.btn-back-em { width:38px; height:38px; border-radius:12px; background:rgba(255,255,255,.18); border:none; cursor:pointer; font-size:18px; color:#fff; display:flex; align-items:center; justify-content:center; }
+.emergency-top-title { font-family:'Nunito',sans-serif; font-weight:900; font-size:20px; color:#fff; }
+.emergency-body { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:14px 20px; text-align:center; }
+.emergency-pulse { width:100px; height:100px; border-radius:50%; background:rgba(255,255,255,.14); display:flex; align-items:center; justify-content:center; font-size:48px; margin-bottom:20px; animation:pulse-em 1.2s infinite; }
+@keyframes pulse-em { 0%{box-shadow:0 0 0 0 rgba(255,255,255,.35)} 70%{box-shadow:0 0 0 28px rgba(255,255,255,0)} 100%{box-shadow:0 0 0 0 rgba(255,255,255,0)} }
+.emergency-title { font-family:'Nunito',sans-serif; font-weight:900; font-size:24px; color:#fff; margin-bottom:7px; }
+.emergency-sub   { font-size:13px; color:rgba(255,255,255,.8); line-height:1.5; margin-bottom:24px; }
+.btn-call-em { background:#fff; color:#E1191F; border:none; cursor:pointer; border-radius:17px; padding:16px; width:100%; font-family:'Nunito',sans-serif; font-weight:900; font-size:16px; box-shadow:0 8px 24px rgba(0,0,0,.22); transition:transform .2s; margin-bottom:10px; }
+.btn-call-em:hover { transform:scale(1.03); }
+.btn-cancel-em { background:transparent; color:rgba(255,255,255,.8); border:2px solid rgba(255,255,255,.35); cursor:pointer; border-radius:14px; padding:12px; width:100%; font-family:'Nunito',sans-serif; font-weight:700; font-size:13px; transition:background .2s; }
+.btn-cancel-em:hover { background:rgba(255,255,255,.1); }
+.em-contacts-wrap { padding:0 16px 24px; flex-shrink:0; }
+.em-contact { background:rgba(255,255,255,.14); border-radius:13px; padding:11px 13px; display:flex; align-items:center; gap:10px; margin-bottom:7px; }
+.em-contact-name { font-weight:700; color:#fff; font-size:12px; }
+.em-contact-rel  { font-size:10px; color:rgba(255,255,255,.7); }
+.em-contact-call { margin-left:auto; background:rgba(255,255,255,.22); border:none; cursor:pointer; border-radius:8px; padding:6px 10px; color:#fff; font-weight:700; font-size:11px; }
+
+/* ── ALERT SCREEN ── */
+#screen-alert {
+  background:linear-gradient(160deg, var(--cl-navy) 0%, #1A3580 60%, var(--cl-navy-md) 100%);
+  z-index:100;
+}
+.alert-body { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:22px; text-align:center; }
+.alert-badge { background:var(--cl-violet); color:#fff; font-family:'Nunito',sans-serif; font-weight:900; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; padding:5px 16px; border-radius:99px; margin-bottom:18px; }
+.alert-icon-wrap { width:96px; height:96px; border-radius:50%; background:linear-gradient(135deg, var(--cl-violet), #5E28A8); display:flex; align-items:center; justify-content:center; font-size:48px; margin-bottom:22px; animation:glow-alert 2s infinite; }
+@keyframes glow-alert { 0%,100%{box-shadow:0 0 0 18px rgba(128,64,204,.12),0 0 0 36px rgba(128,64,204,.06)} 50%{box-shadow:0 0 0 26px rgba(128,64,204,.17),0 0 0 52px rgba(128,64,204,.08)} }
+.alert-title { font-family:'Nunito',sans-serif; font-weight:900; font-size:23px; color:#fff; margin-bottom:8px; line-height:1.2; }
+.alert-msg   { font-size:13px; color:rgba(255,255,255,.75); line-height:1.6; margin-bottom:8px; }
+.alert-med-box { background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.16); border-radius:16px; padding:14px 20px; margin:14px 0; width:100%; }
+.alert-med-name { font-family:'Nunito',sans-serif; font-weight:900; font-size:17px; color:#fff; }
+.alert-med-dose { font-size:12px; color:rgba(255,255,255,.7); margin-top:3px; }
+.btn-confirm { background:linear-gradient(135deg, #1DB954, #158A3E); color:#fff; border:none; cursor:pointer; border-radius:18px; padding:17px; width:100%; font-family:'Nunito',sans-serif; font-weight:900; font-size:17px; box-shadow:0 8px 24px rgba(29,185,84,.45); transition:transform .2s; margin-bottom:10px; }
+.btn-confirm:hover { transform:scale(1.03); }
+.btn-snooze { background:rgba(240,120,48,.2); color:#FFB07A; border:1px solid rgba(240,120,48,.35); cursor:pointer; border-radius:15px; padding:13px; width:100%; font-family:'Nunito',sans-serif; font-weight:700; font-size:13px; transition:background .2s; }
+.btn-snooze:hover { background:rgba(240,120,48,.3); }
+.alert-countdown { font-size:11px; color:rgba(255,255,255,.5); margin-top:14px; }
+.alert-countdown span { color:#F4C430; font-weight:700; }
+
+/* ── CONFIRMED (GREEN) ── */
+#screen-confirmed {
+  background:linear-gradient(160deg, #0E6B3A 0%, #13924E 50%, #1DB954 100%);
+  z-index:100;
+}
+.confirmed-body { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px 28px; text-align:center; }
+.confirmed-checkwrap {
+  width:120px; height:120px; border-radius:50%;
+  background:rgba(255,255,255,.18);
+  display:flex; align-items:center; justify-content:center;
+  margin-bottom:28px;
+  animation:pop-in .5s cubic-bezier(.17,.67,.3,1.4) both;
+}
+@keyframes pop-in { 0%{transform:scale(0);opacity:0} 100%{transform:scale(1);opacity:1} }
+.confirmed-check {
+  width:72px; height:72px; border-radius:50%;
+  background:#fff;
+  display:flex; align-items:center; justify-content:center; font-size:38px;
+  box-shadow:0 8px 24px rgba(0,0,0,.18);
+}
+.confirmed-title { font-family:'Nunito',sans-serif; font-weight:900; font-size:28px; color:#fff; margin-bottom:10px; line-height:1.15; }
+.confirmed-sub   { font-size:15px; color:rgba(255,255,255,.85); line-height:1.6; margin-bottom:28px; }
+.confirmed-med-box { background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.25); border-radius:18px; padding:16px 22px; margin-bottom:30px; width:100%; }
+.confirmed-med-name { font-family:'Nunito',sans-serif; font-weight:900; font-size:18px; color:#fff; }
+.confirmed-med-dose { font-size:12px; color:rgba(255,255,255,.75); margin-top:4px; }
+.confirmed-time { font-size:13px; color:rgba(255,255,255,.65); margin-top:4px; }
+.confirmed-streak { background:rgba(255,255,255,.15); border-radius:14px; padding:12px 18px; display:flex; align-items:center; gap:12px; width:100%; margin-bottom:20px; }
+.confirmed-streak-icon { font-size:30px; }
+.confirmed-streak-label { font-size:11px; color:rgba(255,255,255,.7); }
+.confirmed-streak-val { font-family:'Nunito',sans-serif; font-weight:900; font-size:16px; color:#fff; }
+.btn-confirmed-back { background:#fff; color:#0E6B3A; border:none; cursor:pointer; border-radius:18px; padding:16px; width:100%; font-family:'Nunito',sans-serif; font-weight:900; font-size:16px; box-shadow:0 6px 20px rgba(0,0,0,.2); transition:transform .2s; }
+.btn-confirmed-back:hover { transform:scale(1.03); }
+
+/* ── SNOOZED (ORANGE) ── */
+#screen-snoozed {
+  background:linear-gradient(160deg, #7A3800 0%, #B05210 50%, #F07830 100%);
+  z-index:100;
+}
+.snoozed-body { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px 28px; text-align:center; }
+.snoozed-clock-wrap {
+  width:120px; height:120px; border-radius:50%;
+  background:rgba(255,255,255,.18);
+  display:flex; align-items:center; justify-content:center;
+  margin-bottom:28px;
+  animation:pop-in .5s cubic-bezier(.17,.67,.3,1.4) both;
+}
+.snoozed-clock {
+  width:72px; height:72px; border-radius:50%; background:#fff;
+  display:flex; align-items:center; justify-content:center; font-size:38px;
+  box-shadow:0 8px 24px rgba(0,0,0,.18);
+}
+.snoozed-title { font-family:'Nunito',sans-serif; font-weight:900; font-size:28px; color:#fff; margin-bottom:10px; line-height:1.15; }
+.snoozed-sub   { font-size:15px; color:rgba(255,255,255,.85); line-height:1.6; margin-bottom:28px; }
+.snoozed-countdown-box { background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.25); border-radius:18px; padding:20px 22px; margin-bottom:28px; width:100%; }
+.snoozed-mins { font-family:'Nunito',sans-serif; font-weight:900; font-size:52px; color:#fff; line-height:1; }
+.snoozed-mins-label { font-size:13px; color:rgba(255,255,255,.75); margin-top:4px; font-weight:600; }
+.snoozed-med-name { font-size:13px; color:rgba(255,255,255,.65); margin-top:8px; }
+.snoozed-tip { background:rgba(255,255,255,.12); border-radius:14px; padding:12px 16px; display:flex; align-items:flex-start; gap:10px; width:100%; margin-bottom:22px; text-align:left; }
+.snoozed-tip-icon { font-size:20px; flex-shrink:0; margin-top:1px; }
+.snoozed-tip-text { font-size:11px; color:rgba(255,255,255,.8); line-height:1.5; }
+.btn-snoozed-back { background:#fff; color:#7A3800; border:none; cursor:pointer; border-radius:18px; padding:16px; width:100%; font-family:'Nunito',sans-serif; font-weight:900; font-size:16px; box-shadow:0 6px 20px rgba(0,0,0,.2); transition:transform .2s; }
+.btn-snoozed-back:hover { transform:scale(1.03); }
+
+/* ── CENTROS ── */
+.center-card { background:var(--card); border-radius:var(--r-sm); padding:13px; margin-bottom:9px; display:flex; gap:11px; box-shadow:var(--shadow-sm); transition:transform .2s; align-items:flex-start; }
+.center-card:hover { transform:translateX(3px); }
+.center-icon-wrap { width:46px; height:46px; border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:21px; flex-shrink:0; }
+.center-name    { font-weight:700; font-size:13px; color:var(--cl-navy); }
+.center-type    { font-size:11px; color:var(--muted); margin-top:1px; }
+.center-address { font-size:11px; color:var(--muted); margin-top:4px; }
+.center-phone   { font-size:11px; font-weight:600; color:var(--cl-blue); margin-top:3px; }
+.center-dist { margin-left:auto; text-align:right; flex-shrink:0; }
+.dist-value { font-family:'Nunito',sans-serif; font-weight:900; font-size:14px; color:var(--cl-navy); }
+.dist-unit  { font-size:10px; color:var(--muted); }
+.dist-badge { margin-top:4px; padding:3px 7px; border-radius:99px; font-size:9px; font-weight:700; }
+.btn-maps { width:100%; margin-top:9px; background:var(--cl-navy); color:#fff; border:none; border-radius:11px; padding:9px; font-family:'Nunito',sans-serif; font-weight:700; font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px; transition:opacity .2s; }
+.btn-maps:hover { opacity:.88; }
+.location-bar { display:flex; align-items:center; gap:8px; background:var(--card); border-radius:13px; padding:9px 13px; margin-bottom:12px; box-shadow:var(--shadow-sm); }
+.location-bar-text { font-size:12px; color:var(--muted); }
+.location-bar-text strong { color:var(--cl-navy); font-weight:700; }
+
+/* ── HISTORIAL ── */
+.history-day-header { display:flex; align-items:center; gap:8px; margin:12px 0 7px; }
+.history-day-label  { font-family:'Nunito',sans-serif; font-weight:800; font-size:12px; color:var(--cl-navy); white-space:nowrap; }
+.history-day-line   { flex:1; height:1px; background:var(--border); }
+.history-item { background:var(--card); border-radius:var(--r-sm); padding:11px 13px; margin-bottom:7px; display:flex; align-items:center; gap:11px; box-shadow:var(--shadow-sm); }
+.history-dot { width:34px; height:34px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+.history-med-name { font-weight:700; font-size:12px; color:var(--cl-navy); }
+.history-meta     { font-size:11px; color:var(--muted); margin-top:2px; }
+.history-status-badge { margin-left:auto; padding:3px 9px; border-radius:99px; font-size:10px; font-weight:700; flex-shrink:0; }
+.h-taken  { background:var(--teal-lt); color:var(--teal-dk); }
+.h-missed { background:var(--red-lt); color:var(--red); }
+.history-summary { background:linear-gradient(135deg, var(--cl-navy), var(--cl-navy-md)); border-radius:var(--r); padding:15px 16px; margin-bottom:14px; display:flex; justify-content:space-around; }
+.hs-block { text-align:center; }
+.hs-value { font-family:'Nunito',sans-serif; font-weight:900; font-size:21px; color:#fff; }
+.hs-label { font-size:10px; color:rgba(255,255,255,.62); margin-top:2px; }
+.hs-divider { width:1px; background:rgba(255,255,255,.18); }
+
+/* ── PERFIL ── */
+.profile-header { background:linear-gradient(160deg, var(--cl-navy), var(--cl-navy-md)); padding:54px 20px 24px; flex-shrink:0; border-radius:0 0 32px 32px; position:relative; overflow:hidden; display:flex; align-items:center; gap:14px; }
+.profile-header::before { content:''; position:absolute; top:-40px; right:-40px; width:150px; height:150px; background:radial-gradient(circle,rgba(128,64,204,.2),transparent 70%); border-radius:50%; }
+.profile-avatar { width:68px; height:68px; border-radius:50%; background:linear-gradient(135deg,var(--cl-violet),#5E28A8); display:flex; align-items:center; justify-content:center; font-size:34px; flex-shrink:0; box-shadow:0 4px 18px rgba(128,64,204,.45); border:3px solid rgba(255,255,255,.25); }
+.profile-name { font-family:'Nunito',sans-serif; font-weight:900; font-size:18px; color:#fff; }
+.profile-id   { font-size:11px; color:rgba(255,255,255,.62); margin-top:3px; }
+.profile-ccss { display:inline-flex; align-items:center; gap:5px; background:rgba(255,255,255,.12); border-radius:99px; padding:4px 11px; margin-top:7px; font-size:11px; color:rgba(255,255,255,.8); font-weight:600; }
+.info-section { margin-bottom:14px; }
+.info-section-title { font-family:'Nunito',sans-serif; font-weight:800; font-size:11px; color:var(--cl-navy); margin-bottom:7px; text-transform:uppercase; letter-spacing:.5px; }
+.info-card { background:var(--card); border-radius:var(--r-sm); padding:3px 0; box-shadow:var(--shadow-sm); overflow:hidden; }
+.info-row { display:flex; align-items:center; padding:10px 13px; border-bottom:1px solid var(--border); gap:11px; }
+.info-row:last-child { border-bottom:none; }
+.info-row-icon { width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+.info-row-label { font-size:10px; color:var(--muted); margin-bottom:2px; }
+.info-row-value { font-weight:700; font-size:12px; color:var(--cl-navy); }
+.blood-badge { display:inline-block; background:var(--red-lt); color:var(--red); font-family:'Nunito',sans-serif; font-weight:900; font-size:14px; padding:2px 11px; border-radius:99px; }
+.padecimiento-tag { display:inline-block; background:var(--cl-navy-lt); color:var(--cl-navy); font-size:10px; font-weight:700; padding:4px 9px; border-radius:99px; margin:2px; }
+
+/* ── SPLASH ── */
+@keyframes splashPop {
+  0%   { opacity:0; transform:scale(.7); }
+  100% { opacity:1; transform:scale(1); }
+}
+@keyframes splashFadeOut {
+  0%   { opacity:1; transform:scale(1); }
+  100% { opacity:0; transform:scale(1.08); }
+}
+#screen-splash {
+  position:absolute; top:0; left:0; right:0; bottom:0;
+  z-index:100;
+  transition: opacity .5s ease, transform .5s ease;
+}
+#screen-splash.splash-exit {
+  animation: splashFadeOut .5s cubic-bezier(.4,0,.2,1) forwards;
+  pointer-events:none;
+}
+
+
+/* ══════════════════════════════════════
+   IDLE ANIMATIONS
+══════════════════════════════════════ */
+
+/* Notification bell gentle swing */
+@keyframes bellSway {
+  0%,100% { transform: rotate(0deg); }
+  20%      { transform: rotate(14deg); }
+  40%      { transform: rotate(-10deg); }
+  60%      { transform: rotate(7deg); }
+  80%      { transform: rotate(-4deg); }
+}
+.notif-btn { animation: bellSway 4s ease-in-out 3.8s infinite; transform-origin: top center; }
+
+/* Adherence ring pulse */
+@keyframes ringPulse {
+  0%,100% { opacity:1; stroke-dashoffset:26; }
+  50%      { opacity:.7; stroke-dashoffset:22; }
+}
+.ring-fg { animation: ringPulse 3.5s ease-in-out infinite; }
+
+/* Next-dose card subtle float */
+@keyframes floatCard {
+  0%,100% { transform: translateY(0px); }
+  50%      { transform: translateY(-4px); }
+}
+.next-dose { animation: floatCard 3.8s ease-in-out infinite; }
+
+/* Module buttons shimmer on hover — already handled — add idle glow pulse to mod-emergencia */
+@keyframes emergencyPulse {
+  0%,100% { box-shadow: var(--shadow-sm); }
+  50%      { box-shadow: 0 0 0 5px rgba(225,25,31,.18), var(--shadow-sm); }
+}
+.mod-emergencia { animation: emergencyPulse 2.8s ease-in-out infinite; }
+
+/* Notification dot already has pulse-dot — make it slightly more dramatic */
+@keyframes pulse-dot {
+  0%,100% { transform:scale(1);   opacity:1; }
+  50%      { transform:scale(1.6); opacity:.75; }
+}
+
+/* Adherence ring number count-up shimmer */
+@keyframes labelShimmer {
+  0%,80%,100% { opacity:1; }
+  90%         { opacity:.4; }
+}
+.ring-label { animation: labelShimmer 5s ease-in-out 1s infinite; }
+
+/* Dose cards: staggered left-edge glow on pending status */
+@keyframes pendingGlow {
+  0%,100% { background: var(--orange-lt); }
+  50%      { background: #ffe5cc; }
+}
+.status-pending { animation: pendingGlow 2.5s ease-in-out infinite; }
+
+/* Splash logo: soft breathe while waiting */
+@keyframes splashBreathe {
+  0%,100% { transform: scale(1);    filter: drop-shadow(0 8px 32px rgba(26,101,209,.18)); }
+  50%      { transform: scale(1.04); filter: drop-shadow(0 16px 48px rgba(26,101,209,.32)); }
+}
+#splash-logo-wrap { animation: splashPop .6s cubic-bezier(.34,1.56,.64,1) both,
+                               splashBreathe 2.8s ease-in-out 0.7s infinite; }
+
+/* Nav active item dot ripple */
+@keyframes dotRipple {
+  0%,100% { transform:translateX(-50%) scale(1);   opacity:1; }
+  50%      { transform:translateX(-50%) scale(1.9); opacity:.45; }
+}
+.nav-active-dot { animation: dotRipple 2.4s ease-in-out infinite; }
+
+/* Stock low badge subtle pulse */
+@keyframes stockWarn {
+  0%,100% { color: var(--orange); }
+  50%      { color: #d05800; }
+}
+.stock-low { animation: stockWarn 2s ease-in-out infinite; }
+
+</style>
+</head>
+<body>
+<div style="position:relative;display:inline-block;">
+<div class="phone">
+<div class="screen">
+  <div class="island"></div>
+  <div class="toast" id="toast"><span id="toast-msg">Acción realizada</span></div>
+
+  
+  <!-- ══ SPLASH SCREEN ══ -->
+  <div id="screen-splash" style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;background:#fff;border-radius:52px;z-index:100;align-items:center;justify-content:center;flex-direction:column;border-radius:52px;">
+    <div id="splash-logo-wrap" style="width:220px;height:auto;animation:splashPop .6s cubic-bezier(.34,1.56,.64,1) both;">
+      <svg id="splash-logo" width="100%" height="100%" viewBox="0 0 3508 3595" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;"><path d="M1980.248,2005.788c0,-231.615 188.042,-419.657 419.657,-419.657c231.615,0 419.657,188.042 419.657,419.657c0,231.615 -188.042,419.657 -419.657,419.657c-231.615,0 -419.657,-188.042 -419.657,-419.657Zm189.879,36.744l158.465,153.448c5.158,4.989 13.36,4.961 18.49,-0.056l281.472,-275.891c21.253,-20.83 20.717,-55.218 -1.184,-75.371l-4.651,-4.284c-20.52,-18.857 -52.258,-18.209 -71.961,1.494l-202.465,202.465c-4.933,4.961 -12.881,5.215 -18.124,0.592l-89.549,-78.782c-20.604,-18.096 -51.694,-17.109 -71.087,2.283c-20.548,20.52 -20.266,53.893 0.592,74.103Z" style="fill:url(#_Linear1);"/><path d="M723.828,443.19c-24.494,21.027 -70.016,1032.984 140.088,1411.193c210.103,378.18 864.936,623.291 864.936,623.291c0,0 115.96,-43.407 265.997,-121.907c-30.019,-34.67 -55.669,-73.173 -76.048,-114.776c-109.872,54.795 -189.95,84.785 -189.95,84.785c0,0 -572.612,-214.331 -756.361,-545.045c-183.721,-330.686 -143.921,-1215.634 -122.471,-1234.012c517.479,-42.872 878.832,-336.802 878.832,-336.802c0,0 361.296,293.93 878.803,336.802c16.743,14.375 44.732,558.575 -31.71,953.357c41.519,14.432 80.67,33.852 116.834,57.501c93.382,-453.044 60.573,-1097.645 41.04,-1114.387c-591.779,-49.017 -1004.967,-385.171 -1004.967,-385.171c0,0 -413.188,336.154 -1005.023,385.171Z" style="fill:url(#_Linear2);fill-rule:nonzero;"/><path d="M1810.169,749.382l-299.906,299.878l437.147,437.147l299.878,-299.906c120.723,-120.695 120.723,-316.395 0,-437.119c-60.348,-60.348 -139.468,-90.536 -218.559,-90.536c-79.092,0 -158.212,30.188 -218.559,90.536Z" style="fill:url(#_Linear3);fill-rule:nonzero;"/><path d="M1210.386,1349.166c-120.723,120.723 -120.723,316.423 0,437.147c120.723,120.695 316.423,120.695 437.119,0l299.906,-299.906l-437.147,-437.147l-299.878,299.906Z" style="fill:url(#_Linear4);fill-rule:nonzero;"/><path d="M1675.612,1064.024c-11.473,11.489 -30.068,11.485 -41.536,-0.011c-11.496,-11.468 -11.5,-30.063 -0.011,-41.536l-0.008,-0.008l239.826,-239.826l0.008,0.008c0.002,-0.002 0.004,-0.004 0.006,-0.006c11.472,-11.472 30.075,-11.472 41.547,0c11.472,11.472 11.472,30.075 0,41.547c-0.002,0.002 -0.004,0.004 -0.006,0.006l0.006,0.006l-239.826,239.826l-0.006,-0.006Z" style="fill:#fff;"/><path d="M1285.187,1454.451c-11.473,11.489 -30.068,11.485 -41.536,-0.011c-11.496,-11.468 -11.5,-30.063 -0.011,-41.536l-0.008,-0.008l239.826,-239.826l0.008,0.008c0.002,-0.002 0.004,-0.004 0.006,-0.006c11.472,-11.472 30.075,-11.472 41.547,0c11.472,11.472 11.472,30.075 0,41.547c-0.002,0.002 -0.004,0.004 -0.006,0.006l0.006,0.006l-239.826,239.826l-0.006,-0.006Z" style="fill:#fff;"/><path d="M226.869,2630.164c43.126,-23.508 94.538,-35.29 154.322,-35.29c37.009,0 72.693,5.694 107.109,17.053c34.36,11.387 62.123,27.116 83.32,47.213l-38.898,97.61c-23.282,-18.519 -46.931,-32.161 -71.002,-40.871c-24.071,-8.738 -49.327,-13.107 -75.794,-13.107c-52.878,0 -92.931,15.615 -120.188,46.818c-27.228,31.231 -40.871,75.399 -40.871,132.477c0,57.67 13.642,102.12 40.871,133.295c27.256,31.231 67.31,46.818 120.188,46.818c26.467,0 51.723,-4.341 75.794,-13.079c24.071,-8.738 47.72,-22.352 71.002,-40.871l38.898,97.582c-21.196,19.59 -48.96,35.205 -83.32,46.818c-34.416,11.641 -70.1,17.448 -107.109,17.448c-59.784,0 -111.196,-11.754 -154.322,-35.29c-43.126,-23.536 -76.048,-56.993 -98.794,-100.373c-22.747,-43.351 -34.106,-94.143 -34.106,-152.349c0,-58.149 11.359,-108.8 34.106,-151.926c22.747,-43.097 55.669,-76.414 98.794,-99.978Zm510.939,140.454c21.957,-3.974 42.449,-5.976 61.503,-5.976c40.702,0 74.441,5.976 101.162,17.87c26.693,11.895 46.536,30.301 59.502,55.133c12.938,24.889 19.449,56.345 19.449,94.425l0,230.088l-111.873,0l0,-57.867c-3.608,9.302 -8.512,17.729 -14.685,25.34c-10.316,12.712 -23.282,22.606 -38.869,29.737c-15.615,7.159 -33.739,10.711 -54.372,10.711c-29.624,0 -55.528,-5.412 -77.739,-16.264c-22.239,-10.824 -39.687,-25.65 -52.371,-44.422c-12.684,-18.772 -19.054,-40.335 -19.054,-64.66c0,-28.553 7.413,-51.046 22.239,-67.451c14.798,-16.376 38.728,-28.271 71.791,-35.684c33.035,-7.413 77.09,-11.106 132.111,-11.106l28.553,0l0,-13.501c0,-23.254 -5.299,-39.771 -15.869,-49.58c-10.57,-9.781 -28.807,-14.685 -54.738,-14.685c-20.633,0 -42.731,3.185 -66.239,9.527c-23.536,6.37 -46.705,16.405 -69.452,30.16l-32.499,-79.345c13.727,-9.527 30.244,-17.983 49.58,-25.396c19.28,-7.385 39.94,-13.107 61.87,-17.053Zm3.185,305.064c10.316,9.527 24.973,14.291 44.028,14.291c15.334,0 29.089,-3.439 41.265,-10.316c12.177,-6.878 21.676,-16.405 28.553,-28.581c6.878,-12.148 10.316,-26.693 10.316,-43.633l0,-15.052l-27.764,0c-20.097,0 -37.291,0.789 -51.582,2.339c-14.291,1.607 -25.932,4.397 -34.895,8.343c-9.02,3.974 -15.474,9.02 -19.449,15.08c-3.946,6.088 -5.947,13.36 -5.947,21.816c0,14.291 5.158,26.185 15.474,35.712Zm565.283,-310.222l33.345,-3.157l7.131,101.528l-66.633,6.342c-30.16,2.678 -52.512,11.387 -67.056,26.185c-14.544,14.826 -21.816,36.22 -21.816,64.294l0,201.506l-122.161,0l0,-388.778l117.397,0l0,67.422c7.582,-18.885 18.829,-34.219 33.739,-46.001c21.394,-16.912 50.088,-26.665 86.054,-29.342Zm160.297,25.368c30.132,-17.448 64.237,-26.185 102.318,-26.185c38.616,0 71.679,8.09 99.189,24.212c27.51,16.151 48.791,39.179 63.871,69.029c15.08,29.906 22.606,64.942 22.606,105.108l0,30.188l-271.071,0c1.945,14.178 5.44,26.636 10.457,37.291c8.174,17.448 20.745,30.272 37.657,38.475c16.94,8.202 37.573,12.289 61.898,12.289c21.168,0 42.562,-3.157 64.266,-9.527c21.676,-6.342 41.265,-16.123 58.713,-29.342l31.738,80.135c-19.562,14.262 -43.633,25.763 -72.186,34.529c-28.581,8.71 -56.881,13.05 -84.898,13.05c-46.029,0 -85.575,-8.174 -118.638,-24.579c-33.035,-16.376 -58.431,-39.8 -76.16,-70.213c-17.729,-30.413 -26.58,-66.52 -26.58,-108.293c0,-40.222 8.597,-75.258 25.819,-105.136c17.166,-29.878 40.842,-53.555 71.002,-71.03Zm26.157,105.164c-4.538,10.514 -7.667,22.267 -9.414,35.29l171.769,0c-1.466,-26.862 -8.371,-47.748 -20.717,-62.659c-14.037,-16.968 -33.993,-25.396 -59.925,-25.396c-19.562,0 -36.22,4.482 -49.975,13.473c-13.755,8.992 -24.325,22.07 -31.738,39.292Z" style="fill:url(#_Linear5);"/><path d="M1818.964,2611.138l123.007,0l0,455.412l258.613,0l0,103.952l-381.619,0l0,-559.364Zm439.571,94.397l0,-111.084l130.11,0l0,111.084l-130.11,0Zm4.735,464.967l0,-388.778l119.821,0l0,388.778l-119.821,0Zm375.277,-376.461c24.325,-14.037 51.582,-21.055 81.741,-21.055c31.71,0 57.501,5.947 77.344,17.842c19.815,11.923 34.754,30.047 44.817,54.372c10.034,24.325 15.08,55.02 15.08,92.029l0,233.273l-119.793,0l0,-228.537c0,-17.955 -2.142,-32.527 -6.342,-43.633c-4.256,-11.106 -10.711,-19.28 -19.449,-24.579c-8.738,-5.271 -19.731,-7.92 -32.95,-7.92c-16.912,0 -31.569,3.552 -43.999,10.683c-12.43,7.159 -22.098,17.222 -28.976,30.16c-6.878,12.966 -10.316,28.44 -10.316,46.423l0,217.404l-119.793,0l0,-388.778l117.426,0l0,56.232c11.218,-18.406 26.298,-33.035 45.211,-43.915Zm309.433,-182.903l119.793,0l0,331.644l1.578,0l142.794,-161.059l142.822,0l-165.117,184.989l173.855,203.789l-145.189,0l-149.164,-168.218l-1.578,0l0,168.218l-119.793,0l0,-559.364Z" style="fill:url(#_Linear6);"/><path d="M686.328,3535.302l0,-88.534l-35.825,0l0,-12.458l86.392,0l0,12.458l-35.825,0l0,88.534l-14.742,0Zm110.875,1.294c-13.473,0 -23.761,-3.523 -30.864,-10.598c-7.131,-7.075 -10.683,-17.532 -10.683,-31.372l0,-60.319l14.911,0l0,60.009c0,9.865 2.255,17.194 6.793,22.07c4.538,4.876 11.134,7.3 19.843,7.3c8.794,0 15.418,-2.424 19.928,-7.3c4.482,-4.876 6.708,-12.205 6.708,-22.07l0,-60.009l14.629,0l0,60.319c0,13.84 -3.495,24.297 -10.457,31.372c-6.99,7.075 -17.25,10.598 -30.808,10.598Zm131.492,-25.915l-10.464,24.635l-15.052,0l45.014,-100.993l12.318,0l45.127,100.993l-15.193,0l-10.586,-24.635l-51.164,0Zm5.306,-12.064l40.804,0l-20.327,-47.833l-0.282,0l-20.195,47.833Zm135.242,37.979c-10.232,0 -18.97,-2.114 -26.214,-6.314c-7.272,-4.2 -12.825,-10.175 -16.686,-17.983c-3.89,-7.78 -5.806,-16.968 -5.806,-27.567c0,-10.598 1.917,-19.787 5.806,-27.51c3.862,-7.723 9.414,-13.699 16.686,-17.899c7.244,-4.2 15.982,-6.314 26.214,-6.314c6.878,0 13.304,1.071 19.28,3.213c5.947,2.17 10.936,5.243 14.939,9.273l-5.13,11.867c-4.425,-3.918 -8.935,-6.737 -13.558,-8.512c-4.623,-1.776 -9.668,-2.65 -15.108,-2.65c-10.88,0 -19.195,3.354 -24.917,10.006c-5.75,6.708 -8.597,16.207 -8.597,28.525c0,12.318 2.847,21.845 8.597,28.581c5.722,6.737 14.037,10.091 24.917,10.091c5.44,0 10.485,-0.874 15.108,-2.65c4.623,-1.776 9.132,-4.594 13.558,-8.512l5.13,11.895c-4.003,4.003 -8.992,7.075 -14.939,9.217c-5.976,2.17 -12.402,3.241 -19.28,3.241Zm99.423,0.014c-7.159,0 -13.671,-1.212 -19.477,-3.608c-5.835,-2.368 -10.824,-5.863 -14.995,-10.457c-4.143,-4.566 -7.3,-10.034 -9.527,-16.405c-2.199,-6.342 -3.27,-13.473 -3.27,-21.394c0,-7.949 1.071,-15.08 3.27,-21.422c2.227,-6.37 5.355,-11.81 9.471,-16.348c4.087,-4.51 9.076,-7.977 14.911,-10.373c5.806,-2.396 12.346,-3.58 19.618,-3.58c7.159,0 13.642,1.184 19.477,3.58c5.806,2.396 10.824,5.835 14.967,10.316c4.172,4.482 7.329,9.894 9.527,16.264c2.199,6.342 3.298,13.473 3.298,21.394c0,7.949 -1.099,15.108 -3.298,21.506c-2.199,6.398 -5.355,11.895 -9.527,16.461c-4.143,4.594 -9.161,8.09 -14.967,10.457c-5.835,2.396 -12.318,3.608 -19.477,3.608Zm0,-12.909c6.68,0 12.374,-1.522 17.109,-4.594c4.735,-3.044 8.371,-7.498 10.88,-13.304c2.537,-5.835 3.805,-12.853 3.805,-21.055c0,-8.231 -1.24,-15.249 -3.721,-21.055c-2.48,-5.835 -6.088,-10.26 -10.824,-13.276c-4.735,-3.016 -10.485,-4.51 -17.25,-4.51c-6.68,0 -12.402,1.494 -17.109,4.51c-4.735,3.016 -8.371,7.441 -10.908,13.276c-2.509,5.806 -3.777,12.825 -3.777,21.055c0,8.118 1.268,15.108 3.777,20.971c2.537,5.863 6.173,10.345 10.908,13.389c4.707,3.072 10.429,4.594 17.109,4.594Zm88.111,-62.171l0,73.773l-13.473,0l0,-100.993l12.458,0l37.452,69.771l37.186,-69.771l12.177,0l0,100.993l-13.304,0l0,-74.096l-31.682,58.622l-9.02,0l-31.795,-58.298Zm116.76,73.762l0,-100.993l41.829,0c7.329,0 13.558,1.212 18.603,3.664c5.074,2.424 8.907,5.947 11.528,10.514c2.65,4.594 3.946,10.147 3.946,16.63c0,6.511 -1.297,12.064 -3.946,16.686c-2.621,4.651 -6.455,8.174 -11.528,10.598c-5.045,2.452 -11.275,3.664 -18.603,3.664l-26.946,0l0,39.236l-14.883,0Zm14.883,-51.131l24.776,0c7.159,0 12.599,-1.607 16.264,-4.792c3.664,-3.213 5.525,-7.949 5.525,-14.262c0,-6.201 -1.86,-10.908 -5.525,-14.093c-3.664,-3.213 -9.104,-4.82 -16.264,-4.82l-24.776,0l0,37.967Zm89.226,26.521l-10.464,24.635l-15.052,0l45.014,-100.993l12.318,0l45.127,100.993l-15.193,0l-10.586,-24.635l-51.164,0Zm5.306,-12.064l40.804,0l-20.327,-47.833l-0.282,0l-20.195,47.833Zm105.722,-40.034l0,76.716l-13.727,0l0,-100.993l11.303,0l57.867,76.369l0,-76.369l13.755,0l0,100.993l-11.021,0l-58.177,-76.716Zm4.594,-34.734l-7.61,-0.423c0.592,-6.398 2.509,-11.331 5.75,-14.826c3.241,-3.495 7.357,-5.243 12.318,-5.243c2.283,0 4.594,0.479 6.878,1.381c2.283,0.902 4.933,2.255 7.892,4.059c3.044,1.917 5.327,3.185 6.849,3.805c1.522,0.62 2.96,0.93 4.313,0.93c2.762,0 4.989,-0.93 6.652,-2.79c1.663,-1.86 2.79,-4.51 3.354,-7.949l7.61,0.564c-0.479,6.398 -2.339,11.359 -5.581,14.826c-3.241,3.495 -7.357,5.243 -12.318,5.243c-2.311,0 -4.651,-0.507 -7.103,-1.494c-2.424,-1.015 -5.13,-2.424 -8.09,-4.228c-2.678,-1.832 -4.82,-3.044 -6.455,-3.664c-1.607,-0.62 -3.101,-0.93 -4.453,-0.93c-2.762,0 -4.933,0.902 -6.567,2.706c-1.635,1.832 -2.79,4.51 -3.439,8.033Zm110.586,86.832l-10.464,24.635l-15.052,0l45.014,-100.993l12.318,0l45.127,100.993l-15.193,0l-10.586,-24.635l-51.164,0Zm5.306,-12.064l40.804,0l-20.327,-47.833l-0.282,0l-20.195,47.833Zm105.731,-37.088l0,73.773l-13.473,0l0,-100.993l12.458,0l37.452,69.771l37.186,-69.771l12.177,0l0,100.993l-13.304,0l0,-74.096l-31.682,58.622l-9.02,0l-31.795,-58.298Zm131.643,-27.228l0,100.993l-14.883,0l0,-100.993l14.883,0Zm30.529,101.001l0,-100.993l65.308,0l0,12.036l-50.99,0l0,31.654l47.974,0l0,12.036l-47.974,0l0,33.232l50.99,0l0,12.036l-65.308,0Zm105.291,-76.714l0,76.714l-13.755,0l0,-100.993l11.303,0l57.895,76.344l0,-76.344l13.727,0l0,100.993l-11.021,0l-58.149,-76.714Zm124.481,76.714l0,-88.534l-35.825,0l0,-12.458l86.392,0l0,12.458l-35.825,0l0,88.534l-14.742,0Zm107.6,1.308c-7.159,0 -13.671,-1.212 -19.477,-3.608c-5.835,-2.368 -10.824,-5.863 -14.995,-10.457c-4.143,-4.566 -7.3,-10.034 -9.527,-16.405c-2.199,-6.342 -3.27,-13.473 -3.27,-21.394c0,-7.949 1.071,-15.08 3.27,-21.422c2.227,-6.37 5.355,-11.81 9.471,-16.348c4.087,-4.51 9.076,-7.977 14.911,-10.373c5.806,-2.396 12.346,-3.58 19.618,-3.58c7.159,0 13.642,1.184 19.477,3.58c5.806,2.396 10.824,5.835 14.967,10.316c4.172,4.482 7.329,9.894 9.527,16.264c2.199,6.342 3.298,13.473 3.298,21.394c0,7.949 -1.099,15.108 -3.298,21.506c-2.199,6.398 -5.355,11.895 -9.527,16.461c-4.143,4.594 -9.161,8.09 -14.967,10.457c-5.835,2.396 -12.318,3.608 -19.477,3.608Zm0,-12.909c6.68,0 12.374,-1.522 17.109,-4.594c4.735,-3.044 8.371,-7.498 10.88,-13.304c2.537,-5.835 3.805,-12.853 3.805,-21.055c0,-8.231 -1.24,-15.249 -3.721,-21.055c-2.48,-5.835 -6.088,-10.26 -10.824,-13.276c-4.735,-3.016 -10.485,-4.51 -17.25,-4.51c-6.68,0 -12.402,1.494 -17.109,4.51c-4.735,3.016 -8.371,7.441 -10.908,13.276c-2.509,5.806 -3.777,12.825 -3.777,21.055c0,8.118 1.268,15.108 3.777,20.971c2.537,5.863 6.173,10.345 10.908,13.389c4.707,3.072 10.429,4.594 17.109,4.594Zm119.199,11.593l0,-100.993l35.656,0c11.077,0 20.492,1.945 28.215,5.806c7.751,3.862 13.642,9.555 17.701,17.053c4.059,7.498 6.088,16.686 6.088,27.567c0,10.908 -2.029,20.097 -6.088,27.567c-4.059,7.526 -9.95,13.22 -17.701,17.137c-7.723,3.918 -17.137,5.863 -28.215,5.863l-35.656,0Zm14.883,-12.458l19.928,0c12.487,0 21.845,-3.157 28.074,-9.527c6.201,-6.342 9.302,-15.869 9.302,-28.581c0,-12.684 -3.129,-22.211 -9.386,-28.497c-6.257,-6.314 -15.587,-9.471 -27.989,-9.471l-19.928,0l0,76.076Zm114.742,-88.534l0,100.993l-14.883,0l0,-100.993l14.883,0Zm45.844,76.38l-10.464,24.635l-15.052,0l45.014,-100.993l12.318,0l45.127,100.993l-15.193,0l-10.586,-24.635l-51.164,0Zm5.306,-12.064l40.804,0l-20.327,-47.833l-0.282,0l-20.195,47.833Zm144.848,-6.507c1.403,0.47 2.712,1.118 3.927,1.944c2.79,1.889 5.355,4.961 7.639,9.161l17.476,32.076l-16.32,0l-17.476,-32.217c-1.325,-2.48 -2.79,-4.425 -4.369,-5.806c-1.578,-1.381 -3.382,-2.339 -5.44,-2.875c-2.058,-0.507 -4.482,-0.789 -7.244,-0.789l-16.179,0l0,41.688l-14.883,0l0,-100.993l41.829,0c10.88,0 19.28,2.593 25.199,7.751c5.919,5.158 8.879,12.458 8.879,21.901c0,6.145 -1.325,11.387 -4.003,15.756c-2.678,4.425 -6.567,7.751 -11.697,10.034c-2.245,1.017 -4.693,1.805 -7.337,2.369Zm-37.987,-9.669l24.494,0c7.244,0 12.74,-1.522 16.489,-4.594c3.721,-3.044 5.581,-7.582 5.581,-13.614c0,-5.891 -1.86,-10.401 -5.581,-13.445c-3.749,-3.044 -9.245,-4.594 -16.489,-4.594l-24.494,0l0,36.248Zm104.152,-48.14l0,100.993l-14.883,0l0,-100.993l14.883,0Zm74.354,102.309c-7.159,0 -13.671,-1.212 -19.477,-3.608c-5.835,-2.368 -10.824,-5.863 -14.995,-10.457c-4.143,-4.566 -7.3,-10.034 -9.527,-16.405c-2.199,-6.342 -3.27,-13.473 -3.27,-21.394c0,-7.949 1.071,-15.08 3.27,-21.422c2.227,-6.37 5.355,-11.81 9.471,-16.348c4.087,-4.51 9.076,-7.977 14.911,-10.373c5.806,-2.396 12.346,-3.58 19.618,-3.58c7.159,0 13.642,1.184 19.477,3.58c5.806,2.396 10.824,5.835 14.967,10.316c4.172,4.482 7.329,9.894 9.527,16.264c2.199,6.342 3.298,13.473 3.298,21.394c0,7.949 -1.099,15.108 -3.298,21.506c-2.199,6.398 -5.355,11.895 -9.527,16.461c-4.143,4.594 -9.161,8.09 -14.967,10.457c-5.835,2.396 -12.318,3.608 -19.477,3.608Zm0,-12.909c6.68,0 12.374,-1.522 17.109,-4.594c4.735,-3.044 8.371,-7.498 10.88,-13.304c2.537,-5.835 3.805,-12.853 3.805,-21.055c0,-8.231 -1.24,-15.249 -3.721,-21.055c-2.48,-5.835 -6.088,-10.26 -10.824,-13.276c-4.735,-3.016 -10.485,-4.51 -17.25,-4.51c-6.68,0 -12.402,1.494 -17.109,4.51c-4.735,3.016 -8.371,7.441 -10.908,13.276c-2.509,5.806 -3.777,12.825 -3.777,21.055c0,8.118 1.268,15.108 3.777,20.971c2.537,5.863 6.173,10.345 10.908,13.389c4.707,3.072 10.429,4.594 17.109,4.594Zm134.03,-39.509l380.097,0l0,14.291l-380.097,0l0,-14.291Zm-2816.495,0l380.097,0l0,14.291l-380.097,0l0,-14.291Z" style="fill:#0f4189;"/><defs><linearGradient id="_Linear1" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0,839.318223,-839.318223,0,2399.909027,1584.594561)"><stop offset="0" style="stop-color:#ffb3f1;stop-opacity:1"/><stop offset="0.99" style="stop-color:#9a00ff;stop-opacity:1"/><stop offset="1" style="stop-color:#9a00ff;stop-opacity:1"/></linearGradient><linearGradient id="_Linear2" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(1591.795274,1591.795274,-1591.795274,1591.795274,898.442345,268.588996)"><stop offset="0" style="stop-color:#04428a;stop-opacity:1"/><stop offset="0.99" style="stop-color:#002a68;stop-opacity:1"/><stop offset="1" style="stop-color:#002a68;stop-opacity:1"/></linearGradient><linearGradient id="_Linear3" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0,-733.212433,733.212433,-0,1924.051768,1422.36304)"><stop offset="0" style="stop-color:#033785;stop-opacity:1"/><stop offset="0.99" style="stop-color:#1a65d1;stop-opacity:1"/><stop offset="1" style="stop-color:#1a65d1;stop-opacity:1"/></linearGradient><linearGradient id="_Linear4" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0,733.212433,-733.212433,0,1533.62605,1164.831257)"><stop offset="0" style="stop-color:#69c6f8;stop-opacity:1"/><stop offset="0.99" style="stop-color:#308ed5;stop-opacity:1"/><stop offset="1" style="stop-color:#308ed5;stop-opacity:1"/></linearGradient><linearGradient id="_Linear5" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0,-575.223097,575.223097,-0,332.783359,3170.090245)"><stop offset="0" style="stop-color:#002a68;stop-opacity:1"/><stop offset="1" style="stop-color:#04428a;stop-opacity:1"/></linearGradient><linearGradient id="_Linear6" x1="0" y1="0" x2="1" y2="0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0,-559.350201,559.350201,-0,2009.782868,3170.489373)"><stop offset="0" style="stop-color:#1f7dcd;stop-opacity:1"/><stop offset="1" style="stop-color:#5bbdf5;stop-opacity:1"/></linearGradient></defs></svg>
+    </div>
+  </div>
+
+  <!-- ══ HOME ══ -->
+  <div class="app-screen" id="screen-home">
+    <div class="home-header">
+      <div class="logo-row">
+        <!-- CareLink logo fiel al PDF: escudo azul marino + cápsula + check violeta + tipografía Care/Link -->
+        <div class="cl-logo-row">
+          <svg class="cl-logo-svg" viewBox="0 0 3508 4019" xmlns="http://www.w3.org/2000/svg" style="color:#fff;">
+  <path d="M3447.889,3190.104c0,370.764 -300.566,671.396 -671.396,671.396c-370.764,0 -671.396,-300.632 -671.396,-671.396c0,-370.764 300.632,-671.396 671.396,-671.396c370.83,0 671.396,300.632 671.396,671.396Zm-1038.997,58.791l253.55,245.495c8.251,7.989 21.347,7.923 29.533,-0.065l450.326,-441.42c33.986,-33.331 33.134,-88.336 -1.899,-120.554l-7.465,-6.876c-32.807,-30.188 -83.556,-29.14 -115.119,2.423l-323.878,323.878c-7.923,7.923 -20.627,8.316 -29.009,0.917l-143.277,-125.989c-32.938,-28.943 -82.705,-27.372 -113.744,3.667c-32.807,32.807 -32.414,86.241 0.982,118.524Z" fill="currentColor"/>
+  <path d="M2006.807,3566.356c-175.756,87.747 -303.906,135.681 -303.906,135.681c0,0 -916.04,-342.934 -1209.993,-871.97c-293.953,-529.036 -230.238,-1944.776 -195.925,-1974.178c827.835,-68.626 1405.918,-538.859 1405.918,-538.859c0,-0 578.017,470.233 1405.918,538.859c26.848,22.984 71.638,893.645 -50.684,1525.162c66.4,23.115 129.067,54.154 186.888,92.003c149.432,-724.83 96.915,-1756.054 65.679,-1782.837c-946.752,-78.448 -1607.801,-616.259 -1607.801,-616.259c0,-0 -661.05,537.811 -1607.801,616.259c-39.224,33.593 -112.041,1652.657 224.082,2257.653c336.124,605.062 1383.719,997.173 1383.719,997.173c0,0 185.578,-69.477 425.573,-195.008c-47.999,-55.464 -89.057,-117.083 -121.667,-183.679" fill="currentColor"/>
+  <path d="M2018.899,2392.86l-446.099,446.112c-193.109,193.109 -506.248,193.109 -699.357,0c-193.109,-193.109 -193.109,-506.248 0,-699.357l446.13,-446.081l699.327,699.327Zm-631.976,-766.675l446.093,-446.105c193.109,-193.109 506.248,-193.109 699.357,0c193.109,193.109 193.109,506.248 0,699.357l-446.123,446.075l-699.327,-699.327Zm-393.761,681.864l383.667,-383.667c18.335,-18.335 18.335,-48.14 -0,-66.475c-18.335,-18.335 -48.13,-18.325 -66.465,0.01l-383.667,383.667c-18.401,18.335 -18.404,48.123 -0.003,66.459c18.335,18.401 48.133,18.407 66.468,0.007Zm624.615,-624.615l383.667,-383.667c18.335,-18.335 18.335,-48.14 0,-66.475c-18.335,-18.335 -48.13,-18.325 -66.465,0.01l-383.667,383.667c-18.401,18.335 -18.404,48.123 -0.003,66.459c18.335,18.401 48.133,18.407 66.468,0.007Z" fill="currentColor"/>
+</svg>
+          <div class="cl-wordmark-wrap">
+            <div class="cl-wordmark-text"><span class="cl-care">Care</span><span class="cl-link">Link</span></div>
+            
+          </div>
+        </div>
+        <button class="notif-btn" onclick="go('screen-alert')">🔔<div class="notif-dot"></div></button>
+      </div>
+      <div class="greeting">Buenos días,</div>
+      <div class="user-name">María González 👋</div>
+      <div class="adherence-card">
+        <div class="adherence-ring">
+          <svg width="50" height="50" viewBox="0 0 50 50">
+            <circle class="ring-bg" cx="25" cy="25" r="21"/>
+            <circle class="ring-fg" cx="25" cy="25" r="21"/>
+          </svg>
+          <div class="ring-label">80%</div>
+        </div>
+        <div><div class="adherence-title">Adherencia mensual</div><div class="adherence-sub">4 de 5 dosis tomadas hoy ✓</div></div>
+      </div>
+    </div>
+    <div onclick="go('screen-reminder')" class="next-dose">
+      <span style="font-size:24px;">⏰</span>
+      <div><div class="next-dose-label">Próxima dosis</div><div class="next-dose-value">Metformina 500mg — 8:00 PM</div></div>
+      <div class="next-dose-arrow">›</div>
+    </div>
+    <div class="module-grid">
+      <button class="module-btn mod-reminder" onclick="go('screen-reminder')">
+        <div class="module-icon-wrap">⏰</div><div class="module-label">Recordatorio</div><div class="module-sub">Ver horarios</div>
+      </button>
+      <button class="module-btn mod-farmacia" onclick="go('screen-farmacia')">
+        <div class="module-icon-wrap">💊</div><div class="module-label">Mi Farmacia</div><div class="module-sub">4 medicamentos</div>
+      </button>
+      <button class="module-btn mod-pedidos" onclick="go('screen-pedidos')">
+        <div class="module-icon-wrap">📦</div><div class="module-label">Pedidos</div><div class="module-sub">1 en camino</div>
+      </button>
+      <button class="module-btn mod-citas" onclick="go('screen-citas')">
+        <div class="module-icon-wrap">🏥</div><div class="module-label">Citas Médicas</div><div class="module-sub">Próxima: 12 Abr</div>
+      </button>
+      <button class="module-btn mod-contactos" onclick="go('screen-contactos')">
+        <div class="module-icon-wrap">👥</div><div class="module-label">Contactos</div><div class="module-sub">5 contactos</div>
+      </button>
+      <button class="module-btn mod-emergencia" onclick="go('screen-emergencia')">
+        <div class="module-icon-wrap">🆘</div><div class="module-label">Emergencia</div><div class="module-sub">Cruz Roja · 2528-0000</div>
+      </button>
+    </div>
+    <div class="nav-bar">
+      <button class="nav-item active" onclick="navGo('screen-home',0)"><span class="nav-icon">🏠</span><span class="nav-label">Inicio</span><div class="nav-active-dot"></div></button>
+      <button class="nav-item" onclick="navGo('screen-centros',1)"><span class="nav-icon">📍</span><span class="nav-label">Centros</span><div class="nav-active-dot"></div></button>
+      <button class="nav-item" onclick="navGo('screen-historial',2)"><span class="nav-icon">📋</span><span class="nav-label">Historial</span><div class="nav-active-dot"></div></button>
+      <button class="nav-item" onclick="navGo('screen-perfil',3)"><span class="nav-icon">👤</span><span class="nav-label">Perfil</span><div class="nav-active-dot"></div></button>
+    </div>
+  </div>
+
+  <!-- ══ RECORDATORIO ══ -->
+  <div class="app-screen" id="screen-reminder">
+    <div style="background:var(--card);padding:54px 16px 10px;flex-shrink:0;border-bottom:1px solid var(--border);">
+      <div style="display:flex;align-items:center;gap:11px;padding-bottom:8px;">
+        <button class="btn-back" onclick="go('screen-home')">‹</button>
+        <span style="font-family:'Nunito',sans-serif;font-weight:800;font-size:18px;color:var(--cl-navy);">Mis Recordatorios</span>
+      </div>
+      <div style="padding:0 2px 8px;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Progreso de hoy</div>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:80%"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:3px;"><span>4 de 5 dosis tomadas</span><span style="color:var(--cl-violet);font-weight:700;">80%</span></div>
+      </div>
+    </div>
+    <div class="scrollable">
+      <div class="section-title">Hoy — Lunes 7 Abril</div>
+      <div class="dose-card"><div class="dose-time-block"><div class="dose-time">7:00</div><div class="dose-period">AM</div></div><div><div class="dose-name">Metformina 500mg</div><div class="dose-detail">1 tableta · Con alimentos</div></div><div class="dose-status status-taken">✅</div></div>
+      <div class="dose-card"><div class="dose-time-block"><div class="dose-time">8:00</div><div class="dose-period">AM</div></div><div><div class="dose-name">Lisinopril 10mg</div><div class="dose-detail">1 tableta · En ayunas</div></div><div class="dose-status status-taken">✅</div></div>
+      <div class="dose-card"><div class="dose-time-block" style="background:var(--orange-lt);"><div class="dose-time" style="color:var(--orange);">1:00</div><div class="dose-period" style="color:var(--orange);">PM</div></div><div><div class="dose-name">Atorvastatina 20mg</div><div class="dose-detail">1 tableta · Con almuerzo</div></div><div class="dose-status status-taken">✅</div></div>
+      <div class="dose-card"><div class="dose-time-block"><div class="dose-time">3:00</div><div class="dose-period">PM</div></div><div><div class="dose-name">Vitamina D 1000 UI</div><div class="dose-detail">1 cápsula · Con comida</div></div><div class="dose-status status-taken">✅</div></div>
+      <div class="dose-card" style="border:2px solid var(--cl-violet-lt);"><div class="dose-time-block" style="background:var(--cl-violet-lt);"><div class="dose-time" style="color:var(--cl-violet);">8:00</div><div class="dose-period" style="color:var(--cl-violet);">PM</div></div><div><div class="dose-name">Metformina 500mg</div><div class="dose-detail">1 tableta · Con cena</div></div><div class="dose-status status-pending">🕗</div></div>
+      <div class="section-title" style="margin-top:6px;">Ayer — Domingo</div>
+      <div class="dose-card" style="opacity:.7;"><div class="dose-time-block" style="background:var(--red-lt);"><div class="dose-time" style="color:var(--red);">8:00</div><div class="dose-period" style="color:var(--red);">PM</div></div><div><div class="dose-name">Metformina 500mg</div><div class="dose-detail">⚠️ Dosis omitida</div></div><div class="dose-status status-missed">❌</div></div>
+    </div>
+  </div>
+
+  <!-- ══ FARMACIA ══ -->
+  <div class="app-screen" id="screen-farmacia">
+    <div style="background:var(--card);padding:54px 16px 10px;flex-shrink:0;border-bottom:1px solid var(--border);">
+      <div style="display:flex;align-items:center;gap:11px;"><button class="btn-back" onclick="go('screen-home')">‹</button><span style="font-family:'Nunito',sans-serif;font-weight:800;font-size:18px;color:var(--cl-navy);">Mi Farmacia</span></div>
+    </div>
+    <div class="scrollable">
+      <div class="section-title">Mis Medicamentos</div>
+      <div class="med-card"><div class="med-icon-wrap" style="background:var(--teal-lt);">💊</div><div style="flex:1;"><div class="med-name">Metformina</div><div class="med-dose">500mg · 2 veces al día</div><div class="med-stock stock-ok">📦 Quedan: 28 tabletas</div></div><div class="med-schedule">7:00 AM<br>8:00 PM</div></div>
+      <div class="med-card"><div class="med-icon-wrap" style="background:var(--cl-blue-lt);">💙</div><div style="flex:1;"><div class="med-name">Lisinopril</div><div class="med-dose">10mg · 1 vez al día</div><div class="med-stock stock-low">⚠️ Quedan: 6 tabletas</div></div><div class="med-schedule" style="background:var(--orange-lt);color:var(--orange);">8:00 AM</div></div>
+      <div class="med-card"><div class="med-icon-wrap" style="background:var(--cl-violet-lt);">💜</div><div style="flex:1;"><div class="med-name">Atorvastatina</div><div class="med-dose">20mg · 1 vez al día</div><div class="med-stock stock-ok">📦 Quedan: 20 tabletas</div></div><div class="med-schedule" style="background:var(--cl-violet-lt);color:var(--cl-violet);">1:00 PM</div></div>
+      <div class="med-card"><div class="med-icon-wrap" style="background:#FFF8E1;">🌟</div><div style="flex:1;"><div class="med-name">Vitamina D</div><div class="med-dose">1000 UI · 1 vez al día</div><div class="med-stock stock-ok">📦 Quedan: 45 cápsulas</div></div><div class="med-schedule" style="background:#FFF8E1;color:#8a6900;">3:00 PM</div></div>
+      <div style="background:var(--orange-lt);border-radius:var(--r-sm);padding:11px 13px;display:flex;align-items:center;gap:9px;margin-top:4px;"><span style="font-size:20px;">⚠️</span><div><div style="font-weight:700;font-size:12px;color:var(--orange);">Stock bajo: Lisinopril</div><div style="font-size:11px;color:var(--muted);margin-top:1px;">Solo quedan 6 tabletas. ¿Deseas pedir?</div></div></div>
+      <button onclick="go('screen-pedidos')" style="width:100%;margin-top:9px;background:var(--orange);color:#fff;border:none;border-radius:12px;padding:12px;font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;cursor:pointer;">📦 Pedir Lisinopril</button>
+    </div>
+  </div>
+
+  <!-- ══ PEDIDOS ══ -->
+  <div class="app-screen" id="screen-pedidos">
+    <div style="background:var(--card);padding:54px 16px 10px;flex-shrink:0;border-bottom:1px solid var(--border);">
+      <div style="display:flex;align-items:center;gap:11px;"><button class="btn-back" onclick="go('screen-home')">‹</button><span style="font-family:'Nunito',sans-serif;font-weight:800;font-size:18px;color:var(--cl-navy);">Mis Pedidos</span></div>
+    </div>
+    <div class="scrollable">
+      <div class="section-title">Pedido Activo</div>
+      <div class="order-card">
+        <div class="order-header"><span class="order-id">Pedido #CL-20847</span><span class="order-badge badge-transit">🚚 En camino</span></div>
+        <div class="order-steps"><div class="step-dot step-done">✓</div><div class="step-line step-line-done"></div><div class="step-dot step-done">✓</div><div class="step-line step-line-done"></div><div class="step-dot step-active">🚚</div><div class="step-line step-line-next"></div><div class="step-dot step-next">🏠</div></div>
+        <div class="steps-labels" style="margin-bottom:11px;"><div style="text-align:center;"><div class="step-label" style="color:var(--teal-dk);font-weight:700;">Confirmado</div></div><div style="text-align:center;"><div class="step-label" style="color:var(--teal-dk);font-weight:700;">Preparado</div></div><div style="text-align:center;"><div class="step-label" style="color:var(--orange);font-weight:700;">En camino</div></div><div style="text-align:center;"><div class="step-label">Entregado</div></div></div>
+        <div style="background:var(--orange-lt);border-radius:10px;padding:10px;"><div style="font-size:12px;color:var(--cl-navy);">📍 Entrega estimada: <strong>Hoy, 6:30 PM</strong></div><div style="font-size:10px;color:var(--muted);margin-top:2px;">San Rafael de Escazú, 100m sur de la Iglesia</div></div>
+        <div style="margin-top:11px;font-size:11px;color:var(--cl-navy);font-weight:700;">Contenido:</div>
+        <div style="margin-top:5px;font-size:11px;color:var(--muted);">💊 Lisinopril 10mg — 30 tabletas</div>
+      </div>
+      <div class="section-title">Historial</div>
+      <div class="order-card" style="opacity:.85;"><div class="order-header"><span class="order-id">Pedido #CL-20801</span><span class="order-badge badge-delivered">✅ Entregado</span></div><div style="font-size:11px;color:var(--muted);">💊 Metformina 500mg · 31 Mar 2025</div></div>
+      <div class="order-card" style="opacity:.85;"><div class="order-header"><span class="order-id">Pedido #CL-20765</span><span class="order-badge badge-delivered">✅ Entregado</span></div><div style="font-size:11px;color:var(--muted);">💊 Vitamina D 1000UI · 15 Mar 2025</div></div>
+    </div>
+  </div>
+
+  <!-- ══ CITAS ══ -->
+  <div class="app-screen" id="screen-citas">
+    <div style="background:var(--card);padding:54px 16px 10px;flex-shrink:0;border-bottom:1px solid var(--border);">
+      <div style="display:flex;align-items:center;gap:11px;"><button class="btn-back" onclick="go('screen-home')">‹</button><span style="font-family:'Nunito',sans-serif;font-weight:800;font-size:18px;color:var(--cl-navy);">Citas Médicas</span></div>
+    </div>
+    <div class="scrollable">
+      <div class="section-title">Próximas Citas</div>
+      <div class="cita-card"><div class="cita-date-block"><div class="cita-day">12</div><div class="cita-month">Abr</div></div><div style="flex:1;"><div class="cita-doctor">Dra. Sofía Ramírez</div><div class="cita-spec">Endocrinología · Hospital México, CCSS</div><div class="cita-time">⏰ 10:30 AM</div></div></div>
+      <div class="cita-card"><div class="cita-date-block"><div class="cita-day">19</div><div class="cita-month">Abr</div></div><div style="flex:1;"><div class="cita-doctor">Dr. Luis Morales</div><div class="cita-spec">Cardiología · Hospital San Juan de Dios</div><div class="cita-time">⏰ 9:00 AM</div></div></div>
+      <div class="cita-card"><div class="cita-date-block"><div class="cita-day">5</div><div class="cita-month">May</div></div><div style="flex:1;"><div class="cita-doctor">Dra. Elena Torres</div><div class="cita-spec">Medicina General · EBAIS Escazú</div><div class="cita-time">⏰ 11:00 AM</div></div></div>
+      <div style="background:var(--cl-violet-lt);border-radius:var(--r-sm);padding:11px 13px;display:flex;align-items:center;gap:9px;margin-top:4px;"><span style="font-size:18px;">💡</span><div style="font-size:11px;color:var(--cl-violet);">Recuerda llevar tu carné de la CCSS y análisis recientes a tu cita del 12 de abril.</div></div>
+    </div>
+  </div>
+
+  <!-- ══ CONTACTOS ══ -->
+  <div class="app-screen" id="screen-contactos">
+    <div style="background:var(--card);padding:54px 16px 10px;flex-shrink:0;border-bottom:1px solid var(--border);">
+      <div style="display:flex;align-items:center;gap:11px;"><button class="btn-back" onclick="go('screen-home')">‹</button><span style="font-family:'Nunito',sans-serif;font-weight:800;font-size:18px;color:var(--cl-navy);">Contactos</span></div>
+    </div>
+    <div class="scrollable">
+      <div style="background:var(--teal-lt);border-radius:var(--r-sm);padding:10px 12px;display:flex;gap:8px;align-items:center;margin-bottom:12px;"><span style="font-size:17px;">ℹ️</span><div style="font-size:11px;color:var(--teal-dk);font-weight:600;">Se notificará automáticamente si no confirmas tu dosis a tiempo.</div></div>
+      <div class="section-title">Mis Contactos</div>
+      <div class="contact-card"><div class="contact-avatar" style="background:#FFE5E5;">👩</div><div><div class="contact-name">Ana González</div><div class="contact-rel">Hija · Contacto principal</div></div><div class="contact-actions"><button class="btn-call" onclick="showToast('📞 Llamando a Ana...','📞')">📞</button><button class="btn-msg" onclick="showToast('💬 Mensaje enviado a Ana','💬')">💬</button></div></div>
+      <div class="contact-card"><div class="contact-avatar" style="background:var(--cl-blue-lt);">👨</div><div><div class="contact-name">Carlos González</div><div class="contact-rel">Hijo · Contacto secundario</div></div><div class="contact-actions"><button class="btn-call" onclick="showToast('📞 Llamando a Carlos...','📞')">📞</button><button class="btn-msg" onclick="showToast('💬 Mensaje enviado a Carlos','💬')">💬</button></div></div>
+      <div class="contact-card"><div class="contact-avatar" style="background:var(--teal-lt);">👩‍⚕️</div><div><div class="contact-name">Dra. Sofía Ramírez</div><div class="contact-rel">Médico tratante · CCSS</div></div><div class="contact-actions"><button class="btn-call" onclick="showToast('📞 Llamando a Dra. Ramírez...','📞')">📞</button><button class="btn-msg" onclick="showToast('💬 Mensaje enviado','💬')">💬</button></div></div>
+      <div class="contact-card"><div class="contact-avatar" style="background:var(--red-lt);">🏥</div><div><div class="contact-name">Cruz Roja Costarricense</div><div class="contact-rel">Emergencias · 2528-0000</div></div><div class="contact-actions"><button class="btn-call" style="background:var(--red-lt);" onclick="go('screen-emergencia')">🆘</button></div></div>
+      <div class="contact-card"><div class="contact-avatar" style="background:var(--cl-navy-lt);">🏛️</div><div><div class="contact-name">CCSS — Línea de salud</div><div class="contact-rel">Caja Costarricense · 1322</div></div><div class="contact-actions"><button class="btn-call" onclick="showToast('📞 Llamando CCSS 1322...','📞')">📞</button></div></div>
+      <button onclick="showToast('➕ Disponible en versión completa','➕')" style="width:100%;margin-top:8px;background:var(--bg);color:var(--cl-navy);border:2px dashed var(--cl-blue);border-radius:12px;padding:12px;font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;cursor:pointer;">+ Añadir contacto</button>
+    </div>
+  </div>
+
+  <!-- ══ EMERGENCIA ══ -->
+  <div class="app-screen" id="screen-emergencia">
+    <div class="emergency-top"><button class="btn-back-em" onclick="go('screen-home')">‹</button><span class="emergency-top-title">⚠️ Emergencia</span></div>
+    <div class="emergency-body">
+      <div class="emergency-pulse">🆘</div>
+      <div class="emergency-title">¿Necesitas ayuda?</div>
+      <div class="emergency-sub">Al confirmar, se notificará a tus contactos y se iniciará contacto con servicios de emergencia costarricenses.</div>
+      <button class="btn-call-em" onclick="showToast('📞 Llamando Cruz Roja 128... ¡Mantén la calma!','🆘')">📞 Llamar Cruz Roja · 2528-0000</button>
+      <button class="btn-cancel-em" onclick="go('screen-home')">Cancelar — Estoy bien</button>
+    </div>
+    <div class="em-contacts-wrap">
+      <div style="font-size:11px;color:rgba(255,255,255,.7);font-weight:700;margin-bottom:7px;">Notificando automáticamente a:</div>
+      <div class="em-contact"><span style="font-size:20px;">👩</span><div><div class="em-contact-name">Ana González</div><div class="em-contact-rel">Hija · Contacto principal</div></div><button class="em-contact-call" onclick="showToast('📞 Llamando a Ana...','📞')">Llamar</button></div>
+      <div class="em-contact"><span style="font-size:20px;">👨</span><div><div class="em-contact-name">Carlos González</div><div class="em-contact-rel">Hijo</div></div><button class="em-contact-call" onclick="showToast('📞 Llamando a Carlos...','📞')">Llamar</button></div>
+      <div class="em-contact"><span style="font-size:20px;">🏥</span><div><div class="em-contact-name">CCSS · 911</div><div class="em-contact-rel">Emergencias nacionales</div></div><button class="em-contact-call" onclick="showToast('📞 Llamando 911...','🆘')">Llamar</button></div>
+    </div>
+  </div>
+
+  <!-- ══ ALERTA ══ -->
+  <div class="app-screen" id="screen-alert">
+    <div class="status-bar" style="flex-shrink:0;">
+      <div class="status-time" style="color:rgba(255,255,255,.9);">8:00 PM</div>
+      <div style="width:120px;height:34px;"></div>
+      <div class="status-icons" style="color:rgba(255,255,255,.9);">📶 🔋</div>
+    </div>
+    <div class="alert-body">
+      <div class="alert-badge">⏰ RECORDATORIO CARELINK</div>
+      <div class="alert-icon-wrap">💊</div>
+      <div class="alert-title">¡Es hora de tu medicamento!</div>
+      <div class="alert-msg">Tu pastillero inteligente CareLink indica que aún no has tomado tu dosis de la noche.</div>
+      <div class="alert-med-box">
+        <div class="alert-med-name">💊 Metformina 500mg</div>
+        <div class="alert-med-dose">1 tableta · Con la cena · 8:00 PM</div>
+      </div>
+      <button class="btn-confirm" onclick="confirmDose()">✅ Confirmar toma</button>
+      <button class="btn-snooze" onclick="snoozeAlert()">⏱ Recordar en 10 minutos</button>
+      <div class="alert-countdown">Contactos notificados en <span id="countdown">15</span> min si no confirmas</div>
+    </div>
+  </div>
+
+  <!-- ══ CONFIRMADO (VERDE) ══ -->
+  <div class="app-screen" id="screen-confirmed">
+    <div style="height:50px;flex-shrink:0;"></div>
+    <div class="confirmed-body">
+      <div class="confirmed-checkwrap">
+        <div class="confirmed-check">✅</div>
+      </div>
+      <div class="confirmed-title">¡Toma registrada!</div>
+      <div class="confirmed-sub">Excelente, María. Tu dosis ha sido registrada correctamente.</div>
+      <div class="confirmed-med-box">
+        <div class="confirmed-med-name">💊 Metformina 500mg</div>
+        <div class="confirmed-med-dose">1 tableta · Con la cena</div>
+        <div class="confirmed-time">⏰ Registrada hoy a las 8:03 PM</div>
+      </div>
+      <button class="btn-confirmed-back" onclick="goHome()">Volver al inicio</button>
+    </div>
+  </div>
+
+  <!-- ══ POSPUESTO (NARANJA) ══ -->
+  <div class="app-screen" id="screen-snoozed">
+    <div style="height:50px;flex-shrink:0;"></div>
+    <div class="snoozed-body">
+      <div class="snoozed-clock-wrap">
+        <div class="snoozed-clock">⏱</div>
+      </div>
+      <div class="snoozed-title">Recordatorio pospuesto</div>
+      <div class="snoozed-sub">Te avisaremos de nuevo en:</div>
+      <div class="snoozed-countdown-box">
+        <div class="snoozed-mins" id="snooze-display">10</div>
+        <div class="snoozed-mins-label">minutos</div>
+        <div class="snoozed-med-name">💊 Metformina 500mg · 8:00 PM</div>
+      </div>
+      <div class="snoozed-tip">
+        <div class="snoozed-tip-icon">💡</div>
+        <div class="snoozed-tip-text">Recuerda tomar tu medicamento con la cena para mayor efectividad. Tomarlo con alimentos reduce molestias estomacales.</div>
+      </div>
+      <button class="btn-snoozed-back" onclick="goHome()">Entendido, volver al inicio</button>
+    </div>
+  </div>
+
+  <!-- ══ CENTROS ══ -->
+  <div class="app-screen" id="screen-centros">
+    <div style="background:var(--card);padding:54px 16px 10px;flex-shrink:0;border-bottom:1px solid var(--border);">
+      <div style="display:flex;align-items:center;gap:10px;padding-bottom:4px;"><span style="font-size:20px;">📍</span><span style="font-family:'Nunito',sans-serif;font-weight:800;font-size:18px;color:var(--cl-navy);">Centros Cercanos</span></div>
+    </div>
+    <div class="scrollable">
+      <div class="location-bar"><span style="font-size:16px;">📡</span><div class="location-bar-text">Ubicación detectada: <strong>Escazú, San José, CR</strong></div></div>
+      <div class="section-title">EBAIS y Clínicas CCSS</div>
+      <div class="center-card"><div class="center-icon-wrap" style="background:var(--teal-lt);">🏥</div><div style="flex:1;"><div class="center-name">EBAIS Guachipelín</div><div class="center-type">CCSS — Área de Salud Escazú</div><div class="center-address">📌 Guachipelín, 200m norte del Gimnasio Municipal</div><div class="center-phone">📞 2289-0660</div><button class="btn-maps" onclick="showToast('🗺️ Abriendo Maps / Waze...','🗺️')">🗺️ Ver en Maps / Waze</button></div><div class="center-dist"><div class="dist-value">1.2</div><div class="dist-unit">km</div><div class="dist-badge" style="background:var(--teal-lt);color:var(--teal-dk);">Más cercano</div></div></div>
+      <div class="center-card"><div class="center-icon-wrap" style="background:var(--cl-blue-lt);">🏨</div><div style="flex:1;"><div class="center-name">Clínica Clorito Picado</div><div class="center-type">CCSS — Clínica</div><div class="center-address">📌 San Rafael de Escazú, 100m sur de la Iglesia</div><div class="center-phone">📞 2228-2599</div><button class="btn-maps" onclick="showToast('🗺️ Abriendo Maps / Waze...','🗺️')">🗺️ Ver en Maps / Waze</button></div><div class="center-dist"><div class="dist-value">2.5</div><div class="dist-unit">km</div></div></div>
+      <div class="section-title">Farmacias</div>
+      <div class="center-card"><div class="center-icon-wrap" style="background:var(--green-lt);">💊</div><div style="flex:1;"><div class="center-name">Farmacia CCSS Escazú</div><div class="center-type">Farmacia institucional</div><div class="center-address">📌 Escazú Centro, frente al Banco Nacional</div><div class="center-phone">📞 2289-1234</div><button class="btn-maps" onclick="showToast('🗺️ Abriendo Maps / Waze...','🗺️')">🗺️ Ver en Maps / Waze</button></div><div class="center-dist"><div class="dist-value">1.8</div><div class="dist-unit">km</div></div></div>
+      <div class="center-card"><div class="center-icon-wrap" style="background:var(--orange-lt);">🏪</div><div style="flex:1;"><div class="center-name">Farmacia Fischel</div><div class="center-type">Privada · Abierto 24h</div><div class="center-address">📌 Multiplaza Escazú, nivel 1</div><div class="center-phone">📞 2201-0000</div><button class="btn-maps" onclick="showToast('🗺️ Abriendo Maps / Waze...','🗺️')">🗺️ Ver en Maps / Waze</button></div><div class="center-dist"><div class="dist-value">3.1</div><div class="dist-unit">km</div></div></div>
+      <div class="section-title">Emergencias</div>
+      <div class="center-card"><div class="center-icon-wrap" style="background:var(--red-lt);">🚑</div><div style="flex:1;"><div class="center-name">Cruz Roja Costarricense</div><div class="center-type">Sede Escazú · 2528-0000</div><div class="center-address">📌 San Rafael de Escazú, costado norte del Parque</div><div class="center-phone">📞 2528-0000</div><button class="btn-maps" onclick="showToast('🗺️ Abriendo Maps / Waze...','🗺️')" style="background:#E1191F;">🗺️ Ver en Maps / Waze</button></div><div class="center-dist"><div class="dist-value">2.0</div><div class="dist-unit">km</div><div class="dist-badge" style="background:var(--red-lt);color:var(--red);">Emergencias</div></div></div>
+    </div>
+    <div class="nav-bar">
+      <button class="nav-item" onclick="navGo('screen-home',0)"><span class="nav-icon">🏠</span><span class="nav-label">Inicio</span><div class="nav-active-dot"></div></button>
+      <button class="nav-item active" onclick="navGo('screen-centros',1)"><span class="nav-icon">📍</span><span class="nav-label">Centros</span><div class="nav-active-dot"></div></button>
+      <button class="nav-item" onclick="navGo('screen-historial',2)"><span class="nav-icon">📋</span><span class="nav-label">Historial</span><div class="nav-active-dot"></div></button>
+      <button class="nav-item" onclick="navGo('screen-perfil',3)"><span class="nav-icon">👤</span><span class="nav-label">Perfil</span><div class="nav-active-dot"></div></button>
+    </div>
+  </div>
+
+  <!-- ══ HISTORIAL ══ -->
+  <div class="app-screen" id="screen-historial">
+    <div style="background:var(--card);padding:54px 16px 10px;flex-shrink:0;border-bottom:1px solid var(--border);">
+      <div style="display:flex;align-items:center;gap:10px;padding-bottom:4px;"><span style="font-size:20px;">📋</span><span style="font-family:'Nunito',sans-serif;font-weight:800;font-size:18px;color:var(--cl-navy);">Historial de Tomas</span></div>
+    </div>
+    <div class="scrollable">
+      <div class="history-summary">
+        <div class="hs-block"><div class="hs-value">112</div><div class="hs-label">Tomadas</div></div>
+        <div class="hs-divider"></div>
+        <div class="hs-block"><div class="hs-value">8</div><div class="hs-label">Omitidas</div></div>
+        <div class="hs-divider"></div>
+        <div class="hs-block"><div class="hs-value" style="color:#B0C8FF;">93%</div><div class="hs-label">Adherencia</div></div>
+      </div>
+      <div class="history-day-header"><span class="history-day-label">Hoy — 7 Abril</span><div class="history-day-line"></div></div>
+      <div class="history-item"><div class="history-dot" style="background:var(--teal-lt);">💊</div><div><div class="history-med-name">Metformina 500mg</div><div class="history-meta">7:00 AM · Compartimento A</div></div><div class="history-status-badge h-taken">Tomada</div></div>
+      <div class="history-item"><div class="history-dot" style="background:var(--cl-blue-lt);">💙</div><div><div class="history-med-name">Lisinopril 10mg</div><div class="history-meta">8:03 AM · Compartimento B</div></div><div class="history-status-badge h-taken">Tomada</div></div>
+      <div class="history-item"><div class="history-dot" style="background:var(--cl-violet-lt);">💜</div><div><div class="history-med-name">Atorvastatina 20mg</div><div class="history-meta">1:11 PM · Compartimento C</div></div><div class="history-status-badge h-taken">Tomada</div></div>
+      <div class="history-item"><div class="history-dot" style="background:#FFF8E1;">🌟</div><div><div class="history-med-name">Vitamina D 1000 UI</div><div class="history-meta">3:05 PM · Compartimento D</div></div><div class="history-status-badge h-taken">Tomada</div></div>
+      <div class="history-day-header"><span class="history-day-label">Ayer — 6 Abril</span><div class="history-day-line"></div></div>
+      <div class="history-item"><div class="history-dot" style="background:var(--teal-lt);">💊</div><div><div class="history-med-name">Metformina 500mg</div><div class="history-meta">7:01 AM · Compartimento A</div></div><div class="history-status-badge h-taken">Tomada</div></div>
+      <div class="history-item"><div class="history-dot" style="background:var(--red-lt);">❌</div><div><div class="history-med-name">Metformina 500mg</div><div class="history-meta">8:00 PM · No registrada</div></div><div class="history-status-badge h-missed">Omitida</div></div>
+      <div class="history-item"><div class="history-dot" style="background:var(--cl-blue-lt);">💙</div><div><div class="history-med-name">Lisinopril 10mg</div><div class="history-meta">8:09 AM · Compartimento B</div></div><div class="history-status-badge h-taken">Tomada</div></div>
+    </div>
+    <div class="nav-bar">
+      <button class="nav-item" onclick="navGo('screen-home',0)"><span class="nav-icon">🏠</span><span class="nav-label">Inicio</span><div class="nav-active-dot"></div></button>
+      <button class="nav-item" onclick="navGo('screen-centros',1)"><span class="nav-icon">📍</span><span class="nav-label">Centros</span><div class="nav-active-dot"></div></button>
+      <button class="nav-item active" onclick="navGo('screen-historial',2)"><span class="nav-icon">📋</span><span class="nav-label">Historial</span><div class="nav-active-dot"></div></button>
+      <button class="nav-item" onclick="navGo('screen-perfil',3)"><span class="nav-icon">👤</span><span class="nav-label">Perfil</span><div class="nav-active-dot"></div></button>
+    </div>
+  </div>
+
+  <!-- ══ PERFIL ══ -->
+  <div class="app-screen" id="screen-perfil">
+    <div class="profile-header">
+      <div class="profile-avatar">👩</div>
+      <div>
+        <div class="profile-name">María González Soto</div>
+        <div class="profile-id">N.° Asegurada: 3-0456-0789</div>
+        <div class="profile-ccss">🏥 CCSS · EBAIS Guachipelín</div>
+      </div>
+    </div>
+    <div class="scrollable">
+      <div class="info-section">
+        <div class="info-section-title">Información Personal</div>
+        <div class="info-card">
+          <div class="info-row"><div class="info-row-icon" style="background:var(--cl-blue-lt);">🎂</div><div><div class="info-row-label">Fecha de nacimiento</div><div class="info-row-value">14 de marzo, 1955 (71 años)</div></div></div>
+          <div class="info-row"><div class="info-row-icon" style="background:var(--teal-lt);">🪪</div><div><div class="info-row-label">Cédula</div><div class="info-row-value">3-0456-0789</div></div></div>
+          <div class="info-row"><div class="info-row-icon" style="background:var(--cl-violet-lt);">📍</div><div><div class="info-row-label">Dirección</div><div class="info-row-value">Guachipelín, Escazú, San José</div></div></div>
+          <div class="info-row"><div class="info-row-icon" style="background:var(--orange-lt);">📞</div><div><div class="info-row-label">Teléfono</div><div class="info-row-value">+506 8888-0000</div></div></div>
+        </div>
+      </div>
+      <div class="info-section">
+        <div class="info-section-title">Información Médica</div>
+        <div class="info-card">
+          <div class="info-row"><div class="info-row-icon" style="background:var(--red-lt);">🩸</div><div><div class="info-row-label">Tipo de sangre</div><div><span class="blood-badge">O+</span></div></div></div>
+          <div class="info-row"><div class="info-row-icon" style="background:var(--teal-lt);">🏥</div><div><div class="info-row-label">Centro de salud CCSS</div><div class="info-row-value">EBAIS Guachipelín · Área Escazú</div></div></div>
+          <div class="info-row"><div class="info-row-icon" style="background:var(--cl-blue-lt);">👩‍⚕️</div><div><div class="info-row-label">Médico tratante</div><div class="info-row-value">Dra. Sofía Ramírez · Endocrinología</div></div></div>
+          <div class="info-row"><div class="info-row-icon" style="background:#FFF8E1;">⚖️</div><div><div class="info-row-label">Peso / Talla</div><div class="info-row-value">68 kg · 1.62 m · IMC 25.9</div></div></div>
+          <div class="info-row"><div class="info-row-icon" style="background:var(--orange-lt);">⚠️</div><div><div class="info-row-label">Alergias</div><div class="info-row-value">Penicilina, Ibuprofeno</div></div></div>
+        </div>
+      </div>
+      <div class="info-section">
+        <div class="info-section-title">Padecimientos</div>
+        <div style="background:var(--card);border-radius:var(--r-sm);padding:13px;box-shadow:var(--shadow-sm);">
+          <span class="padecimiento-tag">Diabetes Tipo 2</span>
+          <span class="padecimiento-tag">Hipertensión arterial</span>
+          <span class="padecimiento-tag">Hipercolesterolemia</span>
+          <span class="padecimiento-tag">Déficit de Vitamina D</span>
+        </div>
+      </div>
+      <button onclick="showToast('✏️ Edición disponible en versión completa','✏️')" style="width:100%;margin-bottom:6px;background:var(--cl-navy);color:#fff;border:none;border-radius:13px;padding:13px;font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;cursor:pointer;">✏️ Editar información</button>
+    </div>
+    <div class="nav-bar">
+      <button class="nav-item" onclick="navGo('screen-home',0)"><span class="nav-icon">🏠</span><span class="nav-label">Inicio</span><div class="nav-active-dot"></div></button>
+      <button class="nav-item" onclick="navGo('screen-centros',1)"><span class="nav-icon">📍</span><span class="nav-label">Centros</span><div class="nav-active-dot"></div></button>
+      <button class="nav-item" onclick="navGo('screen-historial',2)"><span class="nav-icon">📋</span><span class="nav-label">Historial</span><div class="nav-active-dot"></div></button>
+      <button class="nav-item active" onclick="navGo('screen-perfil',3)"><span class="nav-icon">👤</span><span class="nav-label">Perfil</span><div class="nav-active-dot"></div></button>
+    </div>
+  </div>
+
+</div></div><!-- /screen /phone -->
+<div style="position:absolute;bottom:-34px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);font-size:11px;font-weight:600;padding:5px 18px;border-radius:20px;white-space:nowrap;letter-spacing:.5px;">✦ CareLink — Prototipo Interactivo ✦</div>
+</div>
+
+<script>
+  let currentScreen = 'screen-splash';
+  let cdTimer = null;
+  let alertSchedule = null;
+  let snoozeTimer = null;
+
+  /* ── NAV ── */
+  function go(id) {
+    if (id === currentScreen) return;
+    const cur  = document.getElementById(currentScreen);
+    const next = document.getElementById(id);
+    if (!next) return;
+    // Safari-safe: hide current
+    cur.classList.add('slide-out');
+    setTimeout(function() {
+      cur.classList.remove('active', 'slide-out');
+      cur.style.display = 'none';
+    }, 300);
+    // Safari-safe: show next with a setTimeout instead of double rAF
+    next.style.display = 'flex';
+    next.classList.add('slide-in');
+    setTimeout(function() {
+      next.classList.remove('slide-in');
+      next.classList.add('active');
+    }, 20);
+    currentScreen = id;
+  }
+
+  function navGo(screenId, idx) {
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-bar').forEach(bar => {
+      const items = bar.querySelectorAll('.nav-item');
+      if (items[idx]) items[idx].classList.add('active');
+    });
+    go(screenId);
+  }
+
+  function goHome() {
+    go('screen-home');
+  }
+
+  /* ── TOAST ── */
+  let toastTO;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-msg').textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTO);
+    toastTO = setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  /* ── CONFIRM DOSE → pantalla VERDE ── */
+  function confirmDose() {
+    if (cdTimer) { clearInterval(cdTimer); cdTimer = null; }
+    if (snoozeTimer) { clearTimeout(snoozeTimer); snoozeTimer = null; }
+    document.getElementById('countdown').textContent = '15';
+    go('screen-confirmed');
+    // Re-schedule next alert demo
+    scheduleNextAlert(60000);
+  }
+
+  /* ── SNOOZE → pantalla NARANJA ── */
+  function snoozeAlert() {
+    if (cdTimer) { clearInterval(cdTimer); cdTimer = null; }
+    document.getElementById('countdown').textContent = '15';
+
+    // Countdown visual en pantalla naranja
+    let mins = 10;
+    document.getElementById('snooze-display').textContent = mins;
+    go('screen-snoozed');
+
+    // Vuelve a disparar la alerta en 60s (demo, normalmente serían 600s)
+    if (snoozeTimer) clearTimeout(snoozeTimer);
+    snoozeTimer = setTimeout(() => {
+      showAlert();
+    }, 60000);
+  }
+
+  /* ── COUNTDOWN alerta ── */
+  function startCountdown() {
+    if (cdTimer) clearInterval(cdTimer);
+    let n = 15;
+    const el = document.getElementById('countdown');
+    if (el) el.textContent = n;
+    cdTimer = setInterval(() => {
+      n--;
+      if (el) el.textContent = n;
+      if (n <= 0) { clearInterval(cdTimer); cdTimer = null; }
+    }, 1000);
+  }
+
+  function showAlert() {
+    go('screen-alert');
+    startCountdown();
+  }
+
+  function scheduleNextAlert(delay) {
+    if (alertSchedule) clearTimeout(alertSchedule);
+    alertSchedule = setTimeout(() => {
+      showAlert();
+      scheduleNextAlert(60000);
+    }, delay);
+  }
+
+  /* Dispara la primera alerta a los 20s */
+  scheduleNextAlert(20000);
+
+  /* ── CLOCK ── */
+  function tick() {
+    const now = new Date();
+    const t = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+    document.querySelectorAll('.status-time').forEach(el => {
+      if (!el.closest('#screen-alert')) el.textContent = t;
+    });
+  }
+  tick();
+  setInterval(tick, 30000);
+
+  /* ── SPLASH AUTO-TRANSITION — iOS file:// safe ── */
+  var splashDone = false;
+
+  function showHome() {
+    if (splashDone) return;
+    splashDone = true;
+
+    var splash = document.getElementById('screen-splash');
+    var home   = document.getElementById('screen-home');
+
+    // Mostrar home inmediatamente detrás del splash (sin animación aún)
+    home.style.cssText = 'display:flex; opacity:0; transform:translateX(28px); transition:none;';
+    home.classList.add('active');
+
+    // Ocultar splash con su animación CSS
+    splash.style.pointerEvents = 'none';
+    splash.style.animation = 'splashFadeOut .5s cubic-bezier(.4,0,.2,1) forwards';
+
+    // Cuando termina la animación del splash, revelar home
+    // animationend es el único evento 100% confiable en Safari file://
+    splash.addEventListener('animationend', function onEnd() {
+      splash.removeEventListener('animationend', onEnd);
+      splash.style.display = 'none';
+
+      // Forzar reflow antes de la transición del home — crítico en WebKit
+      void home.offsetHeight;
+      home.style.transition = 'opacity .4s ease, transform .4s ease';
+      home.style.opacity = '1';
+      home.style.transform = 'translateX(0)';
+      currentScreen = 'screen-home';
+
+      // Limpiar inline styles tras la transición
+      setTimeout(function() {
+        home.style.cssText = '';
+      }, 420);
+    }, false);
+
+    // Fallback de seguridad: si animationend no dispara (puede pasar en
+    // Safari con ciertas configuraciones de accesibilidad/reduce motion),
+    // forzar el home visible al doble del tiempo de la animación
+    setTimeout(function() {
+      if (splash.style.display !== 'none') {
+        splash.style.display = 'none';
+        void home.offsetHeight;
+        home.style.transition = 'opacity .4s ease';
+        home.style.opacity = '1';
+        home.style.transform = 'translateX(0)';
+        currentScreen = 'screen-home';
+      }
+    }, 1200);
+  }
+
+  // ── Estrategia de disparo (sin depender de un solo timer) ──
+
+  // 1. Timer principal — agresivamente corto para file://
+  setTimeout(showHome, 2200);
+
+  // 2. El logo tiene animación splashBreathe (infinite). En cuanto el usuario
+  //    toca la pantalla durante el splash, transicionamos de inmediato.
+  document.getElementById('screen-splash').addEventListener('click', showHome, false);
+  document.getElementById('screen-splash').addEventListener('touchstart', showHome, { passive: true });
+
+  // 3. Cuando el documento vuelve a ser visible (tab switching, bfcache)
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible' && !splashDone) showHome();
+  });
+  window.addEventListener('pageshow', function(e) {
+    if (e.persisted && !splashDone) showHome();
+  });
+
+</script>
+</body>
+</html>
