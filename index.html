@@ -68,28 +68,27 @@ body {
 }
 
 /* ── Modo móvil real: sin marco ── */
-html.mobile-mode { height: 100%; }
 body.mobile-mode {
-  height: 100%;
-  min-height: unset;
-  overflow: hidden;
   padding: 0;
-  display: block;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
   background: var(--bg);
+  min-height: 100dvh;
 }
 body.mobile-mode .phone {
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100dvh;
   border-radius: 0;
   box-shadow: none;
   background: var(--bg);
-  position: relative;
+  flex-shrink: 0;
 }
 body.mobile-mode .phone::before,
 body.mobile-mode .phone::after { display: none; }
 body.mobile-mode .screen {
   border-radius: 0;
-  height: 100%;
+  height: 100dvh;
   overflow: hidden;
 }
 body.mobile-mode .app-screen { border-radius: 0; }
@@ -1096,24 +1095,21 @@ body.mobile-mode #proto-label { display: none; }
     splash.style.pointerEvents = 'none';
     splash.style.animation = 'splashFadeOut .5s cubic-bezier(.4,0,.2,1) forwards';
 
-    // Cuando termina la animación del splash, revelar home
-    // animationend es el único evento 100% confiable en Safari file://
-    splash.addEventListener('animationend', function onEnd() {
-      splash.removeEventListener('animationend', onEnd);
+    // Revelar home cuando termina animación splash, con fallback por si animationend no dispara
+    var homeDone = false;
+    function revealHome() {
+      if (homeDone) return;
+      homeDone = true;
       splash.style.display = 'none';
-
-      // Forzar reflow antes de la transición del home — crítico en WebKit
       void home.offsetHeight;
       home.style.transition = 'opacity .4s ease, transform .4s ease';
       home.style.opacity = '1';
       home.style.transform = 'translateX(0)';
       currentScreen = 'screen-home';
-
-      // Limpiar inline styles tras la transición
-      setTimeout(function() {
-        home.style.cssText = '';
-      }, 420);
-    }, false);
+      setTimeout(function() { home.style.cssText = ''; }, 420);
+    }
+    splash.addEventListener('animationend', revealHome, false);
+    setTimeout(revealHome, 700); // fallback si animationend no dispara
 
     // Fallback de seguridad: si animationend no dispara (puede pasar en
     // Safari con ciertas configuraciones de accesibilidad/reduce motion),
