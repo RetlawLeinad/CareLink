@@ -90,6 +90,8 @@ body.mobile-mode .screen {
   height: 100%;
 }
 body.mobile-mode .app-screen { border-radius: 0; }
+body.mobile-mode .screen { overflow: visible; }
+body.mobile-mode .app-screen { overflow: hidden; touch-action: pan-y; }
 body.mobile-mode .island { display: none; }
 body.mobile-mode #proto-label { display: none; }
 .island {
@@ -120,7 +122,7 @@ body.mobile-mode #proto-label { display: none; }
   display:flex; align-items:center; justify-content:center; transition:background .2s;
 }
 .btn-back:hover { background:var(--border); }
-.scrollable { overflow-y:auto; flex:1; padding:16px; }
+.scrollable { overflow-y:auto; flex:1; padding:16px; -webkit-overflow-scrolling:touch; touch-action:pan-y; overscroll-behavior:contain; }
 .scrollable::-webkit-scrollbar { display:none; }
 .section-title { font-family:'Nunito',sans-serif; font-weight:800; font-size:14px; color:var(--cl-navy); margin-bottom:9px; margin-top:4px; }
 .nav-bar {
