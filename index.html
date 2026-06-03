@@ -95,6 +95,9 @@ body.mobile-mode .app-screen { border-radius: 0; overflow: visible; }
 body.mobile-mode .island { display: none; }
 body.mobile-mode #proto-label { display: none; }
 body.mobile-mode .home-header { padding-top: 20px; }
+body.mobile-mode .page-header { padding-top: 20px; }
+body.mobile-mode .emergency-top { padding-top: 20px; }
+body.mobile-mode .profile-header { padding-top: 20px; }
 .island {
   position:absolute; top:12px; left:50%; transform:translateX(-50%);
   width:120px; height:34px; background:#000; border-radius:20px;
@@ -123,6 +126,7 @@ body.mobile-mode .home-header { padding-top: 20px; }
   display:flex; align-items:center; justify-content:center; transition:background .2s;
 }
 .btn-back:hover { background:var(--border); }
+.page-header { background:var(--card); padding:54px 16px 10px; flex-shrink:0; border-bottom:1px solid var(--border); }
 .scrollable { overflow-y:auto; flex:1; padding:16px; -webkit-overflow-scrolling:touch; touch-action:pan-y; overscroll-behavior:contain; }
 .scrollable::-webkit-scrollbar { display:none; }
 .section-title { font-family:'Nunito',sans-serif; font-weight:800; font-size:14px; color:var(--cl-navy); margin-bottom:9px; margin-top:4px; }
@@ -672,7 +676,7 @@ body.mobile-mode .home-header { padding-top: 20px; }
 
   <!-- ══ RECORDATORIO ══ -->
   <div class="app-screen" id="screen-reminder">
-    <div style="background:var(--card);padding:54px 16px 10px;flex-shrink:0;border-bottom:1px solid var(--border);">
+    <div class="page-header">
       <div style="display:flex;align-items:center;gap:11px;padding-bottom:8px;">
         <button class="btn-back" onclick="go('screen-home')">‹</button>
         <span style="font-family:'Nunito',sans-serif;font-weight:800;font-size:18px;color:var(--cl-navy);">Mis Recordatorios</span>
@@ -697,7 +701,7 @@ body.mobile-mode .home-header { padding-top: 20px; }
 
   <!-- ══ FARMACIA ══ -->
   <div class="app-screen" id="screen-farmacia">
-    <div style="background:var(--card);padding:54px 16px 10px;flex-shrink:0;border-bottom:1px solid var(--border);">
+    <div class="page-header">
       <div style="display:flex;align-items:center;gap:11px;"><button class="btn-back" onclick="go('screen-home')">‹</button><span style="font-family:'Nunito',sans-serif;font-weight:800;font-size:18px;color:var(--cl-navy);">Mi Farmacia</span></div>
     </div>
     <div class="scrollable">
@@ -713,7 +717,7 @@ body.mobile-mode .home-header { padding-top: 20px; }
 
   <!-- ══ PEDIDOS ══ -->
   <div class="app-screen" id="screen-pedidos">
-    <div style="background:var(--card);padding:54px 16px 10px;flex-shrink:0;border-bottom:1px solid var(--border);">
+    <div class="page-header">
       <div style="display:flex;align-items:center;gap:11px;"><button class="btn-back" onclick="go('screen-home')">‹</button><span style="font-family:'Nunito',sans-serif;font-weight:800;font-size:18px;color:var(--cl-navy);">Mis Pedidos</span></div>
     </div>
     <div class="scrollable">
@@ -734,7 +738,7 @@ body.mobile-mode .home-header { padding-top: 20px; }
 
   <!-- ══ CITAS ══ -->
   <div class="app-screen" id="screen-citas">
-    <div style="background:var(--card);padding:54px 16px 10px;flex-shrink:0;border-bottom:1px solid var(--border);">
+    <div class="page-header">
       <div style="display:flex;align-items:center;gap:11px;"><button class="btn-back" onclick="go('screen-home')">‹</button><span style="font-family:'Nunito',sans-serif;font-weight:800;font-size:18px;color:var(--cl-navy);">Citas Médicas</span></div>
     </div>
     <div class="scrollable">
@@ -748,7 +752,7 @@ body.mobile-mode .home-header { padding-top: 20px; }
 
   <!-- ══ CONTACTOS ══ -->
   <div class="app-screen" id="screen-contactos">
-    <div style="background:var(--card);padding:54px 16px 10px;flex-shrink:0;border-bottom:1px solid var(--border);">
+    <div class="page-header">
       <div style="display:flex;align-items:center;gap:11px;"><button class="btn-back" onclick="go('screen-home')">‹</button><span style="font-family:'Nunito',sans-serif;font-weight:800;font-size:18px;color:var(--cl-navy);">Contactos</span></div>
     </div>
     <div class="scrollable">
@@ -845,7 +849,7 @@ body.mobile-mode .home-header { padding-top: 20px; }
 
   <!-- ══ CENTROS ══ -->
   <div class="app-screen" id="screen-centros">
-    <div style="background:var(--card);padding:54px 16px 10px;flex-shrink:0;border-bottom:1px solid var(--border);">
+    <div class="page-header">
       <div style="display:flex;align-items:center;gap:10px;padding-bottom:4px;"><span style="font-size:20px;">📍</span><span style="font-family:'Nunito',sans-serif;font-weight:800;font-size:18px;color:var(--cl-navy);">Centros Cercanos</span></div>
     </div>
     <div class="scrollable">
@@ -869,7 +873,7 @@ body.mobile-mode .home-header { padding-top: 20px; }
 
   <!-- ══ HISTORIAL ══ -->
   <div class="app-screen" id="screen-historial">
-    <div style="background:var(--card);padding:54px 16px 10px;flex-shrink:0;border-bottom:1px solid var(--border);">
+    <div class="page-header">
       <div style="display:flex;align-items:center;gap:10px;padding-bottom:4px;"><span style="font-size:20px;">📋</span><span style="font-family:'Nunito',sans-serif;font-weight:800;font-size:18px;color:var(--cl-navy);">Historial de Tomas</span></div>
     </div>
     <div class="scrollable">
