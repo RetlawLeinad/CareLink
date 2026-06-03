@@ -2,7 +2,11 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#090f22">
 <title>CareLink</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nunito+Sans:wght@400;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -62,6 +66,29 @@ body {
   width:100%; height:100%; border-radius:52px;
   overflow:hidden; position:relative; background:var(--bg);
 }
+
+/* ── Modo móvil real: sin marco ── */
+body.mobile-mode {
+  background: var(--bg);
+  padding: 0;
+  align-items: stretch;
+  justify-content: stretch;
+}
+body.mobile-mode .phone {
+  width: 100%;
+  height: 100dvh;
+  border-radius: 0;
+  box-shadow: none;
+  background: var(--bg);
+}
+body.mobile-mode .phone::before,
+body.mobile-mode .phone::after { display: none; }
+body.mobile-mode .screen {
+  border-radius: 0;
+  height: 100dvh;
+}
+body.mobile-mode .island { display: none; }
+body.mobile-mode #proto-label { display: none; }
 .island {
   position:absolute; top:12px; left:50%; transform:translateX(-50%);
   width:120px; height:34px; background:#000; border-radius:20px;
@@ -913,10 +940,18 @@ body {
   </div>
 
 </div></div><!-- /screen /phone -->
-<div style="position:absolute;bottom:-34px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);font-size:11px;font-weight:600;padding:5px 18px;border-radius:20px;white-space:nowrap;letter-spacing:.5px;">✦ CareLink — Prototipo Interactivo ✦</div>
+<div id="proto-label" style="position:absolute;bottom:-34px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);font-size:11px;font-weight:600;padding:5px 18px;border-radius:20px;white-space:nowrap;letter-spacing:.5px;">✦ CareLink — Prototipo Interactivo ✦</div>
 </div>
 
 <script>
+  (function detectDevice() {
+    const ua = navigator.userAgent || '';
+    const isMobile = /Android|iPhone|iPad|iPod|IEMobile|Opera Mini|Mobile|Tablet/i.test(ua)
+      || (navigator.maxTouchPoints > 1 && /Macintosh/i.test(ua)) // iPad con desktop UA
+      || window.matchMedia('(pointer: coarse) and (max-width: 1024px)').matches;
+    if (isMobile) document.body.classList.add('mobile-mode');
+  })();
+
   let currentScreen = 'screen-splash';
   let cdTimer = null;
   let alertSchedule = null;
